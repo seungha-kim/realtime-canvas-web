@@ -3,18 +3,22 @@ import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useDocumentMaterial } from "../hooks";
 import LayerPanelItem from "./LayerPanelItem";
+import { useEditMode } from "../contexts/EditModeContext";
 
 type Props = {};
 
 type InnerProps = Props & {
   system: SystemFacade;
   document: DocumentMaterial | null;
+  enterLayerEditMode: (id: string) => void;
 };
 
 type InnerState = {};
 
 class LayerPanelInner extends Component<InnerProps, InnerState> {
-  private handleItemClick = (id: string) => {};
+  private handleItemClick = (id: string) => {
+    this.props.enterLayerEditMode(id);
+  };
 
   private handleItemDblClick = (id: string) => {
     const name = prompt("new name");
@@ -30,7 +34,7 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 
   render() {
     return (
-      <div style={{ flex: "0 0 200px" }}>
+      <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
         {this.props.document?.children.map((id) => {
           return (
             <LayerPanelItem
@@ -53,7 +57,20 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 function LayerPanel(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
-  return <LayerPanelInner document={document} system={system} {...props} />;
+  const { updateMode } = useEditMode();
+  return (
+    <LayerPanelInner
+      document={document}
+      system={system}
+      enterLayerEditMode={(id) => {
+        updateMode({
+          type: "layerAttr",
+          id,
+        });
+      }}
+      {...props}
+    />
+  );
 }
 
 export default LayerPanel;
