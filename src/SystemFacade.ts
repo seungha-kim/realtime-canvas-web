@@ -1,5 +1,6 @@
 // @ts-ignore
 import mod from "./wasm/realtime-canvas_bg.wasm";
+// @ts-ignore
 import init, { CanvasSystem } from "./wasm/realtime-canvas";
 
 export interface Fragment {
