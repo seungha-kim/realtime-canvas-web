@@ -1,6 +1,6 @@
 import { SystemFacade } from "../SystemFacade";
-import { ComponentChildren, createContext } from 'preact';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { ComponentChildren, createContext } from "preact";
+import { useContext, useEffect, useState } from "preact/hooks";
 
 const SystemFacadeContext = createContext<SystemFacade | null>(null!);
 
@@ -11,9 +11,10 @@ type Props = {
 export function SystemFacadeProvider(props: Props) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const host = "localhost:8080";
-  const [facade, setFacade] = useState<SystemFacade | null>(null);
+  const [facade, setFacade] = useState<SystemFacade>(null as any);
   useEffect(() => {
     (async () => {
+      // TODO: 객체 생성과 소켓 연결 시점을 분리
       const facade = await SystemFacade.create(`${protocol}//${host}/ws/`);
       setFacade(facade);
     })();
@@ -21,11 +22,11 @@ export function SystemFacadeProvider(props: Props) {
 
   return (
     <SystemFacadeContext.Provider value={facade}>
-      {props.children}
+      {facade && props.children}
     </SystemFacadeContext.Provider>
   );
 }
 
 export function useSystemFacade() {
-  return useContext(SystemFacadeContext);
+  return useContext(SystemFacadeContext)!;
 }
