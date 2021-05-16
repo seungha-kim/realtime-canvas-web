@@ -39,7 +39,7 @@ class CanvasInner extends Component<InnerProps, InnerState> {
 
 function Canvas(props: Props) {
   const system = useSystemFacade();
-  const document = useDocumentMaterial(system);
+  const document = useDocumentMaterial();
   return (
     document && <CanvasInner document={document} system={system} {...props} />
   );

@@ -73,6 +73,7 @@ export type DocumentCommand = {
     r_h: number;
     r_v: number;
   };
+  UpdateName?: { id: string; name: string };
 };
 
 type InvalidationListener = (objectId: string) => void;

@@ -30,7 +30,7 @@ class DocumentHeaderInner extends Component<InnerProps, InnerState> {
 
 function DocumentHeader(props: Props) {
   const system = useSystemFacade();
-  const documentMaterial = useDocumentMaterial(system);
+  const documentMaterial = useDocumentMaterial();
 
   return (
     documentMaterial && (

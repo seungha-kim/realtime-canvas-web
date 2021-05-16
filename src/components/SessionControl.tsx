@@ -1,6 +1,7 @@
 import { Component } from "preact";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { SessionSnapshot, SystemFacade } from "../SystemFacade";
+import { useSessionSnapshot } from "../hooks";
 
 type Props = {
   onLeave: () => void;
@@ -8,35 +9,15 @@ type Props = {
 
 type InnerProps = Props & {
   system: SystemFacade;
+  sessionSnapshot: SessionSnapshot | null;
 };
 
-type InnerState = {
-  sessionSnapshot: SessionSnapshot;
-};
+type InnerState = {};
 
 class SessionControlInner extends Component<InnerProps, InnerState> {
-  componentDidMount() {
-    const { system } = this.props;
-    const sessionSnapshot = system.materializeSession();
-    this.setState({ sessionSnapshot });
-    system.addSessionSnapshotChangeListener(this.handleSessionSnapshotUpdate);
-  }
-
-  componentWillUnmount() {
-    this.props.system.removeSessionSnapshotChangeListener(
-      this.handleSessionSnapshotUpdate
-    );
-  }
-
   private handleLeave = async () => {
     await this.props.system.leaveSession();
     this.props.onLeave();
-  };
-
-  private handleSessionSnapshotUpdate = (sessionSnapshot: SessionSnapshot) => {
-    this.setState({
-      sessionSnapshot,
-    });
   };
 
   render() {
@@ -44,7 +25,7 @@ class SessionControlInner extends Component<InnerProps, InnerState> {
       <div>
         <div>
           <button onClick={this.handleLeave}>Leave</button>
-          {this.state.sessionSnapshot?.connections.map((connectionId) => {
+          {this.props.sessionSnapshot?.connections.map((connectionId) => {
             return (
               <div
                 key={connectionId}
@@ -62,7 +43,14 @@ class SessionControlInner extends Component<InnerProps, InnerState> {
 
 function SessionControl(props: Props) {
   const system = useSystemFacade();
-  return <SessionControlInner system={system} {...props} />;
+  const sessionSnapshot = useSessionSnapshot();
+  return (
+    <SessionControlInner
+      sessionSnapshot={sessionSnapshot}
+      system={system}
+      {...props}
+    />
+  );
 }
 
 export default SessionControl;
