@@ -3,7 +3,6 @@ import { useObjectMaterial } from "../hooks";
 
 type Props = {
   id: string;
-  material: ObjectMaterial;
   onClick: () => void;
   onDblClick: () => void;
 };
