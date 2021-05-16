@@ -5,6 +5,7 @@ type Props = {
   id: string;
   onClick: () => void;
   onDblClick: () => void;
+  selected: boolean;
 };
 
 type LayerDescription = {
@@ -30,7 +31,17 @@ function LayerPanelItem(props: Props) {
   const material = useObjectMaterial(props.id);
   const desc = material && createDescription(material);
   return (
-    <div onClick={props.onClick} onDblClick={props.onDblClick}>
+    <div
+      style={{ backgroundColor: props.selected ? "red" : null }}
+      onClick={(e) => {
+        e.stopPropagation();
+        props.onClick();
+      }}
+      onDblClick={(e) => {
+        e.stopPropagation();
+        props.onDblClick();
+      }}
+    >
       {desc?.type} - {desc?.name}
     </div>
   );

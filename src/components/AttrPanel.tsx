@@ -11,10 +11,10 @@ function createInner(mode: EditMode) {
 }
 
 function AttrPanel() {
-  const { mode } = useEditMode();
+  const { editMode } = useEditMode();
   return (
     <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
-      {createInner(mode)}
+      {createInner(editMode)}
     </div>
   );
 }

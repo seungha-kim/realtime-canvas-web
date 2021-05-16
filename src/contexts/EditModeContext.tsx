@@ -19,16 +19,16 @@ type Props = {
 };
 
 type State = {
-  mode: EditMode;
-  updateMode: (mode: EditMode) => void;
+  editMode: EditMode;
+  updateEditMode: (mode: EditMode) => void;
 };
 
 export class EditModeProvider extends Component<Props, State> {
-  state = {
-    mode: null,
-    updateMode: (mode: EditMode) => {
+  state: State = {
+    editMode: null,
+    updateEditMode: (editMode: EditMode) => {
       this.setState({
-        mode,
+        editMode,
       });
     },
   };

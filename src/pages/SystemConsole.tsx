@@ -4,26 +4,40 @@ import SessionControl from "../components/SessionControl";
 import DrawingToolbar from "../components/DrawingToolbar";
 import LayerPanel from "../components/LayerPanel";
 import AttrPanel from "../components/AttrPanel";
-import { EditModeProvider } from "../contexts/EditModeContext";
+import { EditModeProvider, useEditMode } from "../contexts/EditModeContext";
 
 type Props = {
   onLeave: () => void;
 };
 
+type InnerProps = Props;
+
+function SystemConsoleInner(props: InnerProps) {
+  const { updateEditMode } = useEditMode();
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        updateEditMode(null);
+      }}
+    >
+      <DocumentHeader />
+      <DrawingToolbar />
+      <SessionControl onLeave={props.onLeave} />
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <LayerPanel />
+        <Canvas />
+        <AttrPanel />
+      </div>
+    </div>
+  );
+}
+
 function SystemConsole(props: Props) {
   return (
-    <div>
-      <EditModeProvider>
-        <DocumentHeader />
-        <DrawingToolbar />
-        <SessionControl onLeave={props.onLeave} />
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <LayerPanel />
-          <Canvas />
-          <AttrPanel />
-        </div>
-      </EditModeProvider>
-    </div>
+    <EditModeProvider>
+      <SystemConsoleInner {...props} />
+    </EditModeProvider>
   );
 }
 

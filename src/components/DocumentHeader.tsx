@@ -24,7 +24,16 @@ class DocumentHeaderInner extends Component<InnerProps, InnerState> {
 
   render() {
     const { document } = this.props;
-    return <h1 onClick={this.handleTitleClick}>{document.name}</h1>;
+    return (
+      <h1
+        onClick={(e) => {
+          e.stopPropagation();
+          this.handleTitleClick();
+        }}
+      >
+        {document.name}
+      </h1>
+    );
   }
 }
 

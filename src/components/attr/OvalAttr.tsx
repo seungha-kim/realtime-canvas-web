@@ -13,6 +13,9 @@ class OvalAttrInner extends Component<InnerProps, {}> {
     return (
       <div>
         <dl>
+          <dt>Type</dt>
+          <dd>Oval</dd>
+
           <dt>Name</dt>
           <dd>{oval.name}</dd>
 

@@ -3,13 +3,14 @@ import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useDocumentMaterial } from "../hooks";
 import LayerPanelItem from "./LayerPanelItem";
-import { useEditMode } from "../contexts/EditModeContext";
+import { EditMode, useEditMode } from "../contexts/EditModeContext";
 
 type Props = {};
 
 type InnerProps = Props & {
   system: SystemFacade;
   document: DocumentMaterial | null;
+  editMode: EditMode;
   enterLayerEditMode: (id: string) => void;
 };
 
@@ -36,6 +37,8 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
     return (
       <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
         {this.props.document?.children.map((id) => {
+          const { editMode } = this.props;
+          const selected = editMode?.type == "layerAttr" && editMode.id === id;
           return (
             <LayerPanelItem
               key={id}
@@ -46,6 +49,7 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
                 this.handleItemDblClick(id);
               }}
               id={id}
+              selected={selected}
             />
           );
         })}
@@ -57,13 +61,14 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 function LayerPanel(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
-  const { updateMode } = useEditMode();
+  const { editMode, updateEditMode } = useEditMode();
   return (
     <LayerPanelInner
       document={document}
       system={system}
+      editMode={editMode}
       enterLayerEditMode={(id) => {
-        updateMode({
+        updateEditMode({
           type: "layerAttr",
           id,
         });
