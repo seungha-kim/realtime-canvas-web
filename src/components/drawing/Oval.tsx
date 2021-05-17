@@ -8,7 +8,10 @@ function Oval(props: Props) {
   const material = props.material!;
   return (
     <div
-      onClick={() => alert(material.name)}
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(material.name);
+      }}
       style={{
         position: "absolute",
         left: material.pos_x,
