@@ -24,11 +24,7 @@ class CanvasInner extends Component<InnerProps, InnerState> {
         }}
       >
         {this.props.document.children.map((child) => {
-          return (
-            <DrawingObject
-              material={this.props.system.materializeObject(child)}
-            />
-          );
+          return <DrawingObject objectId={child} />;
         })}
       </svg>
     );

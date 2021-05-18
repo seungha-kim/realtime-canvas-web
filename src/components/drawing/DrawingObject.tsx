@@ -1,13 +1,15 @@
 import { ObjectMaterial } from "../../SystemFacade";
 import Oval from "./Oval";
+import { useObjectMaterial } from "../../hooks";
 
 type Props = {
-  material: ObjectMaterial;
+  objectId: string;
 };
 
 function DrawingObject(props: Props) {
-  if (props.material.Oval) {
-    return <Oval material={props.material.Oval} />;
+  const material = useObjectMaterial(props.objectId);
+  if (material?.Oval) {
+    return <Oval material={material.Oval} />;
   } else {
     return null;
   }

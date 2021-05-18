@@ -1,20 +1,23 @@
-import { EditMode, useEditMode } from "../contexts/EditModeContext";
+import {
+  selectEditingObjectId,
+  useEditModeSelector,
+} from "../contexts/EditModeContext";
 import ObjectAttr from "./attr/ObjectAttr";
 
-function createInner(mode: EditMode) {
-  switch (mode?.type) {
-    case "layerAttr":
-      return <ObjectAttr id={mode.id} />;
-    default:
-      return null;
+function createInner(editingObjectId: string | null) {
+  if (editingObjectId !== null) {
+    return <ObjectAttr id={editingObjectId} />;
+  } else {
+    return null;
   }
 }
 
 function AttrPanel() {
-  const { editMode } = useEditMode();
+  const [editingObjectId] = useEditModeSelector(selectEditingObjectId);
+
   return (
     <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
-      {createInner(editMode)}
+      {createInner(editingObjectId)}
     </div>
   );
 }

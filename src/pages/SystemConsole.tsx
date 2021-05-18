@@ -4,7 +4,10 @@ import SessionControl from "../components/SessionControl";
 import DrawingToolbar from "../components/DrawingToolbar";
 import LayerPanel from "../components/LayerPanel";
 import AttrPanel from "../components/AttrPanel";
-import { EditModeProvider, useEditMode } from "../contexts/EditModeContext";
+import {
+  EditModeProvider,
+  useEditModeSelector,
+} from "../contexts/EditModeContext";
 
 type Props = {
   onLeave: () => void;
@@ -13,7 +16,7 @@ type Props = {
 type InnerProps = Props;
 
 function SystemConsoleInner(props: InnerProps) {
-  const { updateEditMode } = useEditMode();
+  const [, updateEditMode] = useEditModeSelector(() => null);
   return (
     <div
       onClick={(e) => {
