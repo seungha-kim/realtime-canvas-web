@@ -16,13 +16,11 @@ type InnerState = {};
 class CanvasInner extends Component<InnerProps, InnerState> {
   render() {
     return (
-      <div
+      <svg
+        width={500}
+        height={500}
         style={{
-          width: 500,
-          height: 500,
           border: "1px solid red",
-          position: "relative",
-          overflow: "hidden",
         }}
       >
         {this.props.document.children.map((child) => {
@@ -32,7 +30,7 @@ class CanvasInner extends Component<InnerProps, InnerState> {
             />
           );
         })}
-      </div>
+      </svg>
     );
   }
 }

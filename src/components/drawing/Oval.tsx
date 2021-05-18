@@ -7,19 +7,15 @@ type Props = {
 function Oval(props: Props) {
   const material = props.material!;
   return (
-    <div
+    <ellipse
       onClick={(e) => {
         e.stopPropagation();
         alert(material.name);
       }}
-      style={{
-        position: "absolute",
-        left: material.pos_x,
-        top: material.pos_y,
-        width: material.r_h * 2,
-        height: material.r_v * 2,
-        border: "1px solid green",
-      }}
+      cx={material.pos_x}
+      cy={material.pos_y}
+      rx={material.r_h}
+      ry={material.r_v}
     />
   );
 }
