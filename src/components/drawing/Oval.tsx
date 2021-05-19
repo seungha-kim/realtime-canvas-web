@@ -56,7 +56,10 @@ class OvalInner extends Component<InnerProps, InnerState> {
 
   handleMouseDown = (e: MouseEvent) => {
     e.stopPropagation();
-    if (this.props.selected && !this.state.controlMode) {
+    if (!this.props.selected) {
+      this.props.onSelect();
+    }
+    if (!this.state.controlMode) {
       this.attachGlobalEventListeners();
 
       this.setState({
