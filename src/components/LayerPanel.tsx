@@ -4,25 +4,25 @@ import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useDocumentMaterial } from "../hooks";
 import LayerPanelItem from "./LayerPanelItem";
 import {
-  GlobalEditModeType,
-  selectEditingObjectId,
-  useEditingSelector,
-} from "../contexts/EditingContext";
+  FocusType,
+  selectFocusedObjectId,
+  useFocusSelector,
+} from "../contexts/FocusContext";
 
 type Props = {};
 
 type InnerProps = Props & {
   system: SystemFacade;
   document: DocumentMaterial | null;
-  editingObjectId: string | null;
-  enterLayerEditMode: (id: string) => void;
+  focusedObjectId: string | null;
+  onLayerSelected: (id: string) => void;
 };
 
 type InnerState = {};
 
 class LayerPanelInner extends Component<InnerProps, InnerState> {
   private handleItemClick = (id: string) => {
-    this.props.enterLayerEditMode(id);
+    this.props.onLayerSelected(id);
   };
 
   private handleItemDblClick = (id: string) => {
@@ -41,8 +41,8 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
     return (
       <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
         {this.props.document?.children.map((id) => {
-          const { editingObjectId } = this.props;
-          const selected = editingObjectId === id;
+          const { focusedObjectId } = this.props;
+          const selected = focusedObjectId === id;
           return (
             <LayerPanelItem
               key={id}
@@ -65,17 +65,15 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 function LayerPanel(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
-  const [editingObjectId, updateEditMode] = useEditingSelector(
-    selectEditingObjectId
-  );
+  const [focused, updateFocus] = useFocusSelector(selectFocusedObjectId);
   return (
     <LayerPanelInner
       document={document}
       system={system}
-      editingObjectId={editingObjectId}
-      enterLayerEditMode={(id) => {
-        updateEditMode({
-          type: GlobalEditModeType.layerPanelItem,
+      focusedObjectId={focused}
+      onLayerSelected={(id) => {
+        updateFocus({
+          type: FocusType.layerPanelItem,
           id,
         });
       }}

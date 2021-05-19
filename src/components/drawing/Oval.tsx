@@ -1,10 +1,10 @@
 import { Component, h, Fragment } from "preact";
 import { ObjectMaterial } from "../../SystemFacade";
 import {
-  GlobalEditModeType,
-  selectEditingObjectId,
-  useEditingSelector,
-} from "../../contexts/EditingContext";
+  FocusType,
+  selectFocusedObjectId,
+  useFocusSelector,
+} from "../../contexts/FocusContext";
 import { useSystemFacade } from "../../contexts/SystemFacadeContext";
 
 type Props = {
@@ -156,19 +156,17 @@ class OvalInner extends Component<InnerProps, InnerState> {
 }
 
 function Oval(props: Props) {
-  const [editingObjectId, updateEditMode] = useEditingSelector(
-    selectEditingObjectId
-  );
+  const [focused, updateFocus] = useFocusSelector(selectFocusedObjectId);
   const system = useSystemFacade();
-  const selected = editingObjectId === props.material?.id;
+  const selected = focused === props.material?.id;
   return (
     <OvalInner
       selected={selected}
       {...props}
       onSelect={() => {
         if (props.material) {
-          updateEditMode({
-            type: GlobalEditModeType.canvasObject,
+          updateFocus({
+            type: FocusType.canvasObject,
             id: props.material.id,
           });
         }

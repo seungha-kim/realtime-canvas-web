@@ -5,10 +5,7 @@ import SessionControl from "../components/SessionControl";
 import DrawingToolbar from "../components/DrawingToolbar";
 import LayerPanel from "../components/LayerPanel";
 import AttrPanel from "../components/AttrPanel";
-import {
-  EditingProvider,
-  useEditingSelector,
-} from "../contexts/EditingContext";
+import { FocusProvider, useFocusSelector } from "../contexts/FocusContext";
 
 type Props = {
   onLeave: () => void;
@@ -33,9 +30,9 @@ function SystemConsoleInner(props: InnerProps) {
 
 function SystemConsole(props: Props) {
   return (
-    <EditingProvider>
+    <FocusProvider>
       <SystemConsoleInner {...props} />
-    </EditingProvider>
+    </FocusProvider>
   );
 }
 
