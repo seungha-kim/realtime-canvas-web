@@ -1,30 +1,6 @@
 import { Component, ComponentChildren, createContext } from "preact";
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-
-class Observable<T> {
-  value: T;
-  observers: Set<(newValue: T, prevValue: T) => void> = new Set();
-
-  constructor(initialValue: T) {
-    this.value = initialValue;
-  }
-
-  addObserver = (observer: (newValue: T, prevValue: T) => void) => {
-    this.observers.add(observer);
-  };
-
-  removeObserver = (observer: (newValue: T, prevValue: T) => void) => {
-    this.observers.delete(observer);
-  };
-
-  updateValue = (newValue: T) => {
-    const prevValue = this.value;
-    this.value = newValue;
-    for (const observer of this.observers) {
-      observer(newValue, prevValue);
-    }
-  };
-}
+import { useContext, useEffect, useState } from "preact/hooks";
+import { Observable } from "../utils/Observable";
 
 type EditModeObservable = Observable<EditMode>;
 
@@ -57,10 +33,6 @@ export class EditModeProvider extends Component<Props, State> {
       </EditModeContext.Provider>
     );
   }
-}
-
-export function useEditMode(): EditModeObservable {
-  return useContext(EditModeContext);
 }
 
 export function useEditModeSelector<
