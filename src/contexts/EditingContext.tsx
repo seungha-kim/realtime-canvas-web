@@ -20,6 +20,13 @@ export type GlobalEditMode =
       id: string;
     };
 
+// export type CanvasTransform = {};
+//
+// export type EditingState = {
+//   globalEditMode: GlobalEditMode;
+//   canvasTransform: CanvasTransform;
+// };
+
 const EditingContext = createContext<Observable<GlobalEditMode>>(null as any);
 
 type Props = {
@@ -30,6 +37,26 @@ type State = {};
 
 export class EditingProvider extends Component<Props, State> {
   observable = new Observable<GlobalEditMode>(null);
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleGlobalKeyDown);
+    document.addEventListener("click", this.handleGlobalClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleGlobalKeyDown);
+    document.removeEventListener("click", this.handleGlobalClick);
+  }
+
+  handleGlobalKeyDown = (e: KeyboardEvent) => {
+    if (e.code === "Escape") {
+      this.observable.updateValue(null);
+    }
+  };
+
+  handleGlobalClick = () => {
+    this.observable.updateValue(null);
+  };
 
   render() {
     return (
@@ -65,7 +92,10 @@ export function useEditingSelector<
 }
 
 export function selectEditingObjectId(editMode: GlobalEditMode): string | null {
-  if (editMode?.type == GlobalEditModeType.layerPanelItem) {
+  if (
+    editMode?.type == GlobalEditModeType.layerPanelItem ||
+    editMode?.type == GlobalEditModeType.canvasObject
+  ) {
     return editMode.id;
   } else {
     return null;

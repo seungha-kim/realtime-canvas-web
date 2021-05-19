@@ -17,14 +17,8 @@ type Props = {
 type InnerProps = Props;
 
 function SystemConsoleInner(props: InnerProps) {
-  const [, updateEditMode] = useEditingSelector(() => null);
   return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        updateEditMode(null);
-      }}
-    >
+    <div>
       <DocumentHeader />
       <DrawingToolbar />
       <SessionControl onLeave={props.onLeave} />

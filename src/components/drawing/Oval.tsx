@@ -35,11 +35,83 @@ class OvalInner extends Component<InnerProps, InnerState> {
     controlMode: null,
   };
 
-  render() {
-    let { selected } = this.props;
-    let { pos_x, pos_y, r_h, r_v } = this.props.material!;
-    const { controlMode } = this.state;
+  componentWillUnmount() {
+    this.cleanupGlobalEventListeners();
+  }
 
+  private attachGlobalEventListeners() {
+    document.addEventListener("mousemove", this.handleGlobalMouseMove);
+    document.addEventListener("mouseup", this.handleGlobalMouseUp);
+  }
+
+  private cleanupGlobalEventListeners() {
+    document.removeEventListener("mousemove", this.handleGlobalMouseMove);
+    document.removeEventListener("mouseup", this.handleGlobalMouseUp);
+  }
+
+  handleClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.props.onSelect();
+  };
+
+  handleMouseDown = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (this.props.selected && !this.state.controlMode) {
+      this.attachGlobalEventListeners();
+
+      this.setState({
+        controlMode: {
+          type: "prepareMoving",
+          initialMousePos: [e.clientX, e.clientY],
+        },
+      });
+    }
+  };
+
+  handleGlobalMouseMove = (e: MouseEvent) => {
+    const { selected } = this.props;
+    const { controlMode } = this.state;
+    if (!selected && controlMode !== null) {
+      this.setState({
+        controlMode: null,
+      });
+    } else if (controlMode && controlMode?.type === "prepareMoving") {
+      this.setState({
+        controlMode: {
+          type: "moving",
+          initialMousePos: controlMode.initialMousePos,
+          currentMousePos: [e.clientX, e.clientY],
+        },
+      });
+    } else if (controlMode?.type === "moving") {
+      this.setState({
+        controlMode: {
+          ...controlMode,
+          currentMousePos: [e.clientX, e.clientY],
+        },
+      });
+    }
+  };
+
+  handleGlobalMouseUp = () => {
+    const { controlMode } = this.state;
+    this.cleanupGlobalEventListeners();
+
+    if (
+      controlMode?.type === "prepareMoving" ||
+      controlMode?.type === "moving"
+    ) {
+      const [pos_x, pos_y] = this.controlledPosition;
+      this.props.onMoveFinished(pos_x, pos_y);
+      this.setState({
+        controlMode: null,
+      });
+    }
+  };
+
+  get controlledPosition(): [number, number] {
+    const { controlMode } = this.state;
+    let { pos_x, pos_y } = this.props.material!;
     if (controlMode?.type == "moving") {
       const [initialX, initialY] = controlMode.initialMousePos;
       const [currentX, currentY] = controlMode.currentMousePos;
@@ -48,60 +120,18 @@ class OvalInner extends Component<InnerProps, InnerState> {
       pos_x += dx;
       pos_y += dy;
     }
+    return [pos_x, pos_y];
+  }
+
+  render() {
+    let { r_h, r_v } = this.props.material!;
+    let [pos_x, pos_y] = this.controlledPosition;
 
     return (
       <>
         <ellipse
-          onClick={(e) => {
-            e.stopPropagation();
-            this.props.onSelect();
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            if (selected && !controlMode) {
-              this.setState({
-                controlMode: {
-                  type: "prepareMoving",
-                  initialMousePos: [e.clientX, e.clientY],
-                },
-              });
-            }
-          }}
-          onMouseMove={(e) => {
-            e.stopPropagation();
-            if (!selected && controlMode !== null) {
-              this.setState({
-                controlMode: null,
-              });
-            } else if (controlMode && controlMode?.type === "prepareMoving") {
-              this.setState({
-                controlMode: {
-                  type: "moving",
-                  initialMousePos: controlMode.initialMousePos,
-                  currentMousePos: [e.clientX, e.clientY],
-                },
-              });
-            } else if (controlMode?.type === "moving") {
-              this.setState({
-                controlMode: {
-                  ...controlMode,
-                  currentMousePos: [e.clientX, e.clientY],
-                },
-              });
-            }
-          }}
-          onMouseUp={(e) => {
-            e.stopPropagation();
-            if (
-              controlMode?.type === "prepareMoving" ||
-              controlMode?.type === "moving"
-            ) {
-              this.props.onMoveFinished(pos_x, pos_y);
-              this.setState({
-                controlMode: null,
-              });
-            }
-          }}
+          onClick={this.handleClick}
+          onMouseDown={this.handleMouseDown}
           cx={pos_x}
           cy={pos_y}
           rx={r_h}
