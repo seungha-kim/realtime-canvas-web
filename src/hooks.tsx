@@ -2,7 +2,6 @@ import {
   DocumentMaterial,
   ObjectMaterial,
   SessionSnapshot,
-  SystemFacade,
 } from "./SystemFacade";
 import { useEffect, useState } from "preact/hooks";
 import { useSystemFacade } from "./contexts/SystemFacadeContext";

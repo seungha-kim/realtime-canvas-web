@@ -1,3 +1,4 @@
+import { h } from "preact";
 import { useObjectMaterial } from "../../hooks";
 import OvalAttr from "./OvalAttr";
 

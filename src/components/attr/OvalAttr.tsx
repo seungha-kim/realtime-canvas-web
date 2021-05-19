@@ -1,5 +1,5 @@
+import { h, Component } from "preact";
 import { ObjectMaterial } from "../../SystemFacade";
-import { Component } from "preact";
 
 type Props = {
   oval: NonNullable<ObjectMaterial["Oval"]>;

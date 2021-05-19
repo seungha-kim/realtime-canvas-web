@@ -1,4 +1,4 @@
-import { Component } from "preact";
+import { h, Component } from "preact";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { SystemFacade } from "../SystemFacade";
 

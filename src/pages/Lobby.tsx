@@ -1,6 +1,6 @@
+import { h, Component, createRef } from "preact";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { SystemFacade } from "../SystemFacade";
-import { Component, createRef } from 'preact';
 
 type Props = {
   onJoin: () => void;

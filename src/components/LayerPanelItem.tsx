@@ -1,3 +1,4 @@
+import { h } from "preact";
 import { ObjectMaterial } from "../SystemFacade";
 import { useObjectMaterial } from "../hooks";
 

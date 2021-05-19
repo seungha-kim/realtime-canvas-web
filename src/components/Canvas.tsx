@@ -1,4 +1,4 @@
-import { Component, ComponentChildren } from "preact";
+import { h, Component } from "preact";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import DrawingObject from "./drawing/DrawingObject";

@@ -1,6 +1,6 @@
-import { SystemFacade } from "../SystemFacade";
-import { ComponentChildren, createContext } from "preact";
+import { h, ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
+import { SystemFacade } from "../SystemFacade";
 
 const SystemFacadeContext = createContext<SystemFacade | null>(null!);
 

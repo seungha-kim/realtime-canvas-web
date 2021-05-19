@@ -1,10 +1,10 @@
-import { Component } from "preact";
+import { Component, h } from "preact";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useDocumentMaterial } from "../hooks";
 import LayerPanelItem from "./LayerPanelItem";
 import {
-  EditMode,
+  EditModeType,
   selectEditingObjectId,
   useEditModeSelector,
 } from "../contexts/EditModeContext";
@@ -75,7 +75,7 @@ function LayerPanel(props: Props) {
       editingObjectId={editingObjectId}
       enterLayerEditMode={(id) => {
         updateEditMode({
-          type: "layerAttr",
+          type: EditModeType.layerPanelItem,
           id,
         });
       }}

@@ -1,5 +1,5 @@
+import { h, Component } from "preact";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
-import { Component } from "preact";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { useDocumentMaterial } from "../hooks";
 

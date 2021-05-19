@@ -1,3 +1,4 @@
+import { h } from "preact";
 import Canvas from "../components/Canvas";
 import DocumentHeader from "../components/DocumentHeader";
 import SessionControl from "../components/SessionControl";

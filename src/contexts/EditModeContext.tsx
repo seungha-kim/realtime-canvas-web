@@ -1,17 +1,22 @@
-import { Component, ComponentChildren, createContext } from "preact";
+import { h, Component, ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { Observable } from "../utils/Observable";
 
 type EditModeObservable = Observable<EditMode>;
 
+export enum EditModeType {
+  layerPanelItem,
+  canvasObject,
+}
+
 export type EditMode =
   | null
   | {
-      type: "layerAttr";
+      type: EditModeType.layerPanelItem;
       id: string;
     }
   | {
-      type: "canvasObject";
+      type: EditModeType.canvasObject;
       id: string;
     };
 
@@ -60,7 +65,7 @@ export function useEditModeSelector<
 }
 
 export function selectEditingObjectId(editMode: EditMode): string | null {
-  if (editMode?.type == "layerAttr") {
+  if (editMode?.type == EditModeType.layerPanelItem) {
     return editMode.id;
   } else {
     return null;

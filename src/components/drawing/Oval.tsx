@@ -1,6 +1,7 @@
+import { Component, h, Fragment } from "preact";
 import { ObjectMaterial } from "../../SystemFacade";
-import { Component } from "preact";
 import {
+  EditModeType,
   selectEditingObjectId,
   useEditModeSelector,
 } from "../../contexts/EditModeContext";
@@ -134,7 +135,7 @@ function Oval(props: Props) {
       onSelect={() => {
         if (props.material) {
           updateEditMode({
-            type: "layerAttr",
+            type: EditModeType.canvasObject,
             id: props.material.id,
           });
         }

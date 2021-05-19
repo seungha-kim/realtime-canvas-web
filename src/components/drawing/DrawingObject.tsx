@@ -1,4 +1,4 @@
-import { ObjectMaterial } from "../../SystemFacade";
+import { h } from "preact";
 import Oval from "./Oval";
 import { useObjectMaterial } from "../../hooks";
 

@@ -1,5 +1,5 @@
-import { ComponentChildren, createContext } from 'preact';
-import { useContext, useMemo, useState } from 'preact/hooks';
+import { h, ComponentChildren, createContext } from "preact";
+import { useContext, useMemo, useState } from "preact/hooks";
 
 type ToastPayload = {
   id: number;
