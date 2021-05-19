@@ -1,8 +1,8 @@
 import { h } from "preact";
 import {
   selectEditingObjectId,
-  useEditModeSelector,
-} from "../contexts/EditModeContext";
+  useEditingSelector,
+} from "../contexts/EditingContext";
 import ObjectAttr from "./attr/ObjectAttr";
 
 function createInner(editingObjectId: string | null) {
@@ -14,7 +14,7 @@ function createInner(editingObjectId: string | null) {
 }
 
 function AttrPanel() {
-  const [editingObjectId] = useEditModeSelector(selectEditingObjectId);
+  const [editingObjectId] = useEditingSelector(selectEditingObjectId);
 
   return (
     <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>

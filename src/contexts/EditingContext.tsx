@@ -2,25 +2,25 @@ import { h, Component, ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { Observable } from "../utils/Observable";
 
-type EditModeObservable = Observable<EditMode>;
+type GlobalEditModeObservable = Observable<GlobalEditMode>;
 
-export enum EditModeType {
+export enum GlobalEditModeType {
   layerPanelItem,
   canvasObject,
 }
 
-export type EditMode =
+export type GlobalEditMode =
   | null
   | {
-      type: EditModeType.layerPanelItem;
+      type: GlobalEditModeType.layerPanelItem;
       id: string;
     }
   | {
-      type: EditModeType.canvasObject;
+      type: GlobalEditModeType.canvasObject;
       id: string;
     };
 
-const EditModeContext = createContext<Observable<EditMode>>(null as any);
+const EditingContext = createContext<Observable<GlobalEditMode>>(null as any);
 
 type Props = {
   children: ComponentChildren;
@@ -28,28 +28,28 @@ type Props = {
 
 type State = {};
 
-export class EditModeProvider extends Component<Props, State> {
-  observable = new Observable<EditMode>(null);
+export class EditingProvider extends Component<Props, State> {
+  observable = new Observable<GlobalEditMode>(null);
 
   render() {
     return (
-      <EditModeContext.Provider value={this.observable}>
+      <EditingContext.Provider value={this.observable}>
         {this.props.children}
-      </EditModeContext.Provider>
+      </EditingContext.Provider>
     );
   }
 }
 
-export function useEditModeSelector<
-  S extends (editMode: EditMode) => any,
+export function useEditingSelector<
+  S extends (editMode: GlobalEditMode) => any,
   R extends ReturnType<S>
->(selector: S): [R, EditModeObservable["updateValue"]] {
-  const editModeObservable = useContext(EditModeContext);
+>(selector: S): [R, GlobalEditModeObservable["updateValue"]] {
+  const editModeObservable = useContext(EditingContext);
   const [memo, setMemo] = useState<R>(selector(editModeObservable.value));
 
   // NOTE: selector must be same across rendering
   useEffect(() => {
-    const observer = (newValue: EditMode) => {
+    const observer = (newValue: GlobalEditMode) => {
       const newMemo = selector(newValue);
       if (memo !== newMemo) {
         setMemo(newMemo);
@@ -64,8 +64,8 @@ export function useEditModeSelector<
   return [memo, editModeObservable.updateValue];
 }
 
-export function selectEditingObjectId(editMode: EditMode): string | null {
-  if (editMode?.type == EditModeType.layerPanelItem) {
+export function selectEditingObjectId(editMode: GlobalEditMode): string | null {
+  if (editMode?.type == GlobalEditModeType.layerPanelItem) {
     return editMode.id;
   } else {
     return null;

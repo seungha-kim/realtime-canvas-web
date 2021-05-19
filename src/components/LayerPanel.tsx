@@ -4,10 +4,10 @@ import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useDocumentMaterial } from "../hooks";
 import LayerPanelItem from "./LayerPanelItem";
 import {
-  EditModeType,
+  GlobalEditModeType,
   selectEditingObjectId,
-  useEditModeSelector,
-} from "../contexts/EditModeContext";
+  useEditingSelector,
+} from "../contexts/EditingContext";
 
 type Props = {};
 
@@ -65,7 +65,7 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 function LayerPanel(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
-  const [editingObjectId, updateEditMode] = useEditModeSelector(
+  const [editingObjectId, updateEditMode] = useEditingSelector(
     selectEditingObjectId
   );
   return (
@@ -75,7 +75,7 @@ function LayerPanel(props: Props) {
       editingObjectId={editingObjectId}
       enterLayerEditMode={(id) => {
         updateEditMode({
-          type: EditModeType.layerPanelItem,
+          type: GlobalEditModeType.layerPanelItem,
           id,
         });
       }}

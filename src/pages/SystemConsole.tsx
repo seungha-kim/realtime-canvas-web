@@ -6,9 +6,9 @@ import DrawingToolbar from "../components/DrawingToolbar";
 import LayerPanel from "../components/LayerPanel";
 import AttrPanel from "../components/AttrPanel";
 import {
-  EditModeProvider,
-  useEditModeSelector,
-} from "../contexts/EditModeContext";
+  EditingProvider,
+  useEditingSelector,
+} from "../contexts/EditingContext";
 
 type Props = {
   onLeave: () => void;
@@ -17,7 +17,7 @@ type Props = {
 type InnerProps = Props;
 
 function SystemConsoleInner(props: InnerProps) {
-  const [, updateEditMode] = useEditModeSelector(() => null);
+  const [, updateEditMode] = useEditingSelector(() => null);
   return (
     <div
       onClick={(e) => {
@@ -39,9 +39,9 @@ function SystemConsoleInner(props: InnerProps) {
 
 function SystemConsole(props: Props) {
   return (
-    <EditModeProvider>
+    <EditingProvider>
       <SystemConsoleInner {...props} />
-    </EditModeProvider>
+    </EditingProvider>
   );
 }
 
