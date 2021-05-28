@@ -127,6 +127,13 @@ class CanvasInner extends Component<InnerProps, {}> {
     panzoomObservable.zoom(newZoomLevel, logicalX, logicalY);
   };
 
+  handleClick = (e: MouseEvent) => {
+    if (this.panningState.type !== PanningStateType.idle) {
+      // NOTE: to prevent from focusing out by global click handler
+      e.stopPropagation();
+    }
+  };
+
   preparePanning = () => {
     if (this.panningState.type !== PanningStateType.idle) {
       return;
@@ -199,6 +206,7 @@ class CanvasInner extends Component<InnerProps, {}> {
           ref={this.svgRef}
           onMouseDown={this.handleMouseDown}
           onWheel={this.handleWheel}
+          onClick={this.handleClick}
           width={500}
           height={500}
           style={{
