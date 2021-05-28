@@ -5,7 +5,8 @@ import SessionControl from "../components/SessionControl";
 import DrawingToolbar from "../components/DrawingToolbar";
 import LayerPanel from "../components/LayerPanel";
 import AttrPanel from "../components/AttrPanel";
-import { FocusProvider, useFocusSelector } from "../contexts/FocusContext";
+import { FocusProvider } from "../contexts/FocusContext";
+import { PanzoomProvider } from "../contexts/PanzoomContext";
 
 type Props = {
   onLeave: () => void;
@@ -31,7 +32,9 @@ function SystemConsoleInner(props: InnerProps) {
 function SystemConsole(props: Props) {
   return (
     <FocusProvider>
-      <SystemConsoleInner {...props} />
+      <PanzoomProvider>
+        <SystemConsoleInner {...props} />
+      </PanzoomProvider>
     </FocusProvider>
   );
 }

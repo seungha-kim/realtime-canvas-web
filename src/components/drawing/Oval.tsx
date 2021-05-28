@@ -6,12 +6,17 @@ import {
   useFocusSelector,
 } from "../../contexts/FocusContext";
 import { useSystemFacade } from "../../contexts/SystemFacadeContext";
+import {
+  PanzoomObservable,
+  usePanzoomObservable,
+} from "../../contexts/PanzoomContext";
 
 type Props = {
   material: ObjectMaterial["Oval"];
 };
 
 type InnerProps = Props & {
+  panzoomObservable: PanzoomObservable;
   selected: boolean;
   onSelect: () => void;
   onMoveFinished: (x: number, y: number) => void;
@@ -116,8 +121,18 @@ class OvalInner extends Component<InnerProps, InnerState> {
     const { controlMode } = this.state;
     let { pos_x, pos_y } = this.props.material!;
     if (controlMode?.type == "moving") {
-      const [initialX, initialY] = controlMode.initialMousePos;
-      const [currentX, currentY] = controlMode.currentMousePos;
+      const [
+        initialX,
+        initialY,
+      ] = this.props.panzoomObservable.domToLogicalPoint(
+        controlMode.initialMousePos
+      );
+      const [
+        currentX,
+        currentY,
+      ] = this.props.panzoomObservable.domToLogicalPoint(
+        controlMode.currentMousePos
+      );
       const dx = currentX - initialX;
       const dy = currentY - initialY;
       pos_x += dx;
@@ -158,10 +173,12 @@ class OvalInner extends Component<InnerProps, InnerState> {
 function Oval(props: Props) {
   const [focused, updateFocus] = useFocusSelector(selectFocusedObjectId);
   const system = useSystemFacade();
+  const panzoomObservable = usePanzoomObservable();
   const selected = focused === props.material?.id;
   return (
     <OvalInner
       selected={selected}
+      panzoomObservable={panzoomObservable}
       {...props}
       onSelect={() => {
         if (props.material) {
