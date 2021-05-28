@@ -86,6 +86,10 @@ class CanvasInner extends Component<InnerProps, InnerState> {
   handleWheel = (e: WheelEvent) => {
     e.preventDefault();
 
+    if (this.panningState.type !== PanningStateType.idle) {
+      return;
+    }
+
     const { panzoomObservable } = this.props;
     const { zoomLevel } = panzoomObservable.value;
     let newZoomLevel = zoomLevel + e.deltaY * -0.01;
