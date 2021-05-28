@@ -41,6 +41,7 @@ type PanningState =
 
 class CanvasInner extends Component<InnerProps, {}> {
   svgRef = createRef<SVGSVGElement>();
+  outerGroupRef = createRef<SVGGElement>();
   panningState: PanningState = { type: PanningStateType.idle };
   canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoomObservable);
 
@@ -133,6 +134,7 @@ class CanvasInner extends Component<InnerProps, {}> {
     this.panningState = { type: PanningStateType.ready };
     this.svgRef.current!.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("keyup", this.handleGlobalKeyUp);
+    this.outerGroupRef.current!.style.pointerEvents = "none";
   };
 
   startPanning = (initialClientX: number, initialClientY: number) => {
@@ -172,6 +174,7 @@ class CanvasInner extends Component<InnerProps, {}> {
     this.panningState = { type: PanningStateType.idle };
     this.svgRef.current!.removeEventListener("mousedown", this.handleMouseDown);
     document.removeEventListener("keyup", this.handleGlobalKeyUp);
+    this.outerGroupRef.current!.style.pointerEvents = "auto";
   };
 
   applyTransform = (panzoom: Panzoom) => {
@@ -189,6 +192,7 @@ class CanvasInner extends Component<InnerProps, {}> {
   };
 
   render() {
+    const toBePanned = this.panningState.type !== PanningStateType.idle;
     return (
       <CanvasInfoProvider canvasInfo={this.canvasInfo}>
         <svg
@@ -201,9 +205,11 @@ class CanvasInner extends Component<InnerProps, {}> {
             border: "1px solid red",
           }}
         >
-          {this.props.document.children.map((child) => {
-            return <DrawingObject objectId={child} />;
-          })}
+          <g ref={this.outerGroupRef}>
+            {this.props.document.children.map((child) => {
+              return <DrawingObject objectId={child} />;
+            })}
+          </g>
         </svg>
       </CanvasInfoProvider>
     );
