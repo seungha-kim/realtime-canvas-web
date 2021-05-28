@@ -8,6 +8,7 @@ import {
   PanzoomObservable,
   usePanzoomObservable,
 } from "../contexts/PanzoomContext";
+import { CanvasInfo, CanvasInfoProvider } from "../contexts/CanvasInfoContext";
 
 type Props = {};
 
@@ -16,8 +17,6 @@ type InnerProps = Props & {
   system: SystemFacade;
   panzoomObservable: PanzoomObservable;
 };
-
-type InnerState = {};
 
 enum PanningStateType {
   idle = "idle",
@@ -34,13 +33,16 @@ type PanningState =
     }
   | {
       type: PanningStateType.panning;
-      initialX: number;
-      initialY: number;
+      initialPanX: number;
+      initialPanY: number;
+      initialClientX: number;
+      initialClientY: number;
     };
 
-class CanvasInner extends Component<InnerProps, InnerState> {
+class CanvasInner extends Component<InnerProps, {}> {
   svgRef = createRef<SVGSVGElement>();
   panningState: PanningState = { type: PanningStateType.idle };
+  canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoomObservable);
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleGlobalKeyDown);
@@ -76,7 +78,30 @@ class CanvasInner extends Component<InnerProps, InnerState> {
   };
 
   handleGlobalMouseMove = (e: MouseEvent) => {
-    this.props.panzoomObservable.pan(e.movementX, e.movementY);
+    if (this.panningState.type === PanningStateType.panning) {
+      const {
+        initialPanX,
+        initialPanY,
+        initialClientX,
+        initialClientY,
+      } = this.panningState;
+      const [
+        initialLogicalX,
+        initialLogicalY,
+      ] = this.canvasInfo.clientToLogicalPoint([
+        initialClientX,
+        initialClientY,
+      ]);
+      const [
+        currentLogicalX,
+        currentLogicalY,
+      ] = this.canvasInfo.clientToLogicalPoint([e.clientX, e.clientY]);
+
+      this.props.panzoomObservable.pan(
+        initialPanX - currentLogicalX + initialLogicalX,
+        initialPanY - currentLogicalY + initialLogicalY
+      );
+    }
   };
 
   handleGlobalMouseUp = (e: MouseEvent) => {
@@ -93,12 +118,12 @@ class CanvasInner extends Component<InnerProps, InnerState> {
     const { panzoomObservable } = this.props;
     const { zoomLevel } = panzoomObservable.value;
     let newZoomLevel = zoomLevel + e.deltaY * -0.01;
+    const [logicalX, logicalY] = this.canvasInfo.clientToLogicalPoint([
+      e.clientX,
+      e.clientY,
+    ]);
 
-    const rect = this.svgRef.current!.getBoundingClientRect();
-    const domPivotX = e.clientX - rect.left;
-    const domPivotY = e.clientY - rect.top;
-
-    panzoomObservable.zoom(newZoomLevel, domPivotX, domPivotY);
+    panzoomObservable.zoom(newZoomLevel, logicalX, logicalY);
   };
 
   preparePanning = () => {
@@ -110,11 +135,17 @@ class CanvasInner extends Component<InnerProps, InnerState> {
     document.addEventListener("keyup", this.handleGlobalKeyUp);
   };
 
-  startPanning = (initialX: number, initialY: number) => {
+  startPanning = (initialClientX: number, initialClientY: number) => {
     if (this.panningState.type !== PanningStateType.ready) {
       return;
     }
-    this.panningState = { type: PanningStateType.panning, initialX, initialY };
+    this.panningState = {
+      type: PanningStateType.panning,
+      initialPanX: this.props.panzoomObservable.value.panX,
+      initialPanY: this.props.panzoomObservable.value.panY,
+      initialClientX,
+      initialClientY,
+    };
     document.addEventListener("mousemove", this.handleGlobalMouseMove);
     document.addEventListener("mouseup", this.handleGlobalMouseUp);
   };
@@ -159,20 +190,22 @@ class CanvasInner extends Component<InnerProps, InnerState> {
 
   render() {
     return (
-      <svg
-        ref={this.svgRef}
-        onMouseDown={this.handleMouseDown}
-        onWheel={this.handleWheel}
-        width={500}
-        height={500}
-        style={{
-          border: "1px solid red",
-        }}
-      >
-        {this.props.document.children.map((child) => {
-          return <DrawingObject objectId={child} />;
-        })}
-      </svg>
+      <CanvasInfoProvider canvasInfo={this.canvasInfo}>
+        <svg
+          ref={this.svgRef}
+          onMouseDown={this.handleMouseDown}
+          onWheel={this.handleWheel}
+          width={500}
+          height={500}
+          style={{
+            border: "1px solid red",
+          }}
+        >
+          {this.props.document.children.map((child) => {
+            return <DrawingObject objectId={child} />;
+          })}
+        </svg>
+      </CanvasInfoProvider>
     );
   }
 }

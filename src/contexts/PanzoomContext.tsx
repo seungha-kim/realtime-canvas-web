@@ -9,25 +9,24 @@ export type Panzoom = {
 };
 
 export class PanzoomObservable extends Observable<Panzoom> {
-  pan = (domDeltaX: number, domDeltaY: number) => {
-    const { panX, panY, zoomLevel } = this.value;
+  pan = (panX: number, panY: number) => {
     this.updateValue({
       ...this.value,
-      panX: panX - domDeltaX / zoomLevel,
-      panY: panY - domDeltaY / zoomLevel,
+      panX,
+      panY,
     });
   };
 
-  zoom = (newZoomLevel: number, domPivotX: number, domPivotY: number) => {
+  zoom = (
+    newZoomLevel: number,
+    logicalPivotX: number,
+    logicalPivotY: number
+  ) => {
     const { panX, panY, zoomLevel } = this.value;
 
     newZoomLevel = Math.min(Math.max(0.125, newZoomLevel), 4);
 
     const scale = newZoomLevel / zoomLevel;
-    const [logicalPivotX, logicalPivotY] = this.domToLogicalPoint([
-      domPivotX,
-      domPivotY,
-    ]);
 
     this.updateValue({
       ...this.value,
@@ -37,11 +36,15 @@ export class PanzoomObservable extends Observable<Panzoom> {
     });
   };
 
-  domToLogicalPoint([x, y]: [number, number]) {
+  domToLogicalPoint([x, y]: [number, number]): [number, number] {
     return [
       this.value.panX + x / this.value.zoomLevel,
       this.value.panY + y / this.value.zoomLevel,
     ];
+  }
+
+  domToLogicalLength(length: number): number {
+    return length / this.value.zoomLevel;
   }
 }
 

@@ -10,6 +10,7 @@ import {
   PanzoomObservable,
   usePanzoomObservable,
 } from "../../contexts/PanzoomContext";
+import { CanvasInfo, useCanvasInfo } from "../../contexts/CanvasInfoContext";
 
 type Props = {
   material: ObjectMaterial["Oval"];
@@ -20,16 +21,17 @@ type InnerProps = Props & {
   selected: boolean;
   onSelect: () => void;
   onMoveFinished: (x: number, y: number) => void;
+  canvasInfo: CanvasInfo;
 };
 
 type InnerState = {
   controlMode:
     | null
-    | { type: "prepareMoving"; initialMousePos: [number, number] }
+    | { type: "prepareMoving"; initialLogicalPoint: [number, number] }
     | {
         type: "moving";
-        initialMousePos: [number, number];
-        currentMousePos: [number, number];
+        initialLogicalPoint: [number, number];
+        currentLogicalPoint: [number, number];
       }
     | { type: "rotating" }
     | { type: "resizing" };
@@ -70,34 +72,48 @@ class OvalInner extends Component<InnerProps, InnerState> {
       this.setState({
         controlMode: {
           type: "prepareMoving",
-          initialMousePos: [e.clientX, e.clientY],
+          initialLogicalPoint: this.props.canvasInfo.clientToLogicalPoint([
+            e.clientX,
+            e.clientY,
+          ]),
         },
       });
     }
   };
 
   handleGlobalMouseMove = (e: MouseEvent) => {
-    const { selected } = this.props;
+    const { selected, panzoomObservable, canvasInfo } = this.props;
     const { controlMode } = this.state;
     if (!selected && controlMode !== null) {
       this.setState({
         controlMode: null,
       });
-    } else if (controlMode && controlMode?.type === "prepareMoving") {
-      this.setState({
-        controlMode: {
-          type: "moving",
-          initialMousePos: controlMode.initialMousePos,
-          currentMousePos: [e.clientX, e.clientY],
-        },
-      });
-    } else if (controlMode?.type === "moving") {
-      this.setState({
-        controlMode: {
-          ...controlMode,
-          currentMousePos: [e.clientX, e.clientY],
-        },
-      });
+    }
+    if (controlMode) {
+      switch (controlMode.type) {
+        case "prepareMoving":
+          this.setState({
+            controlMode: {
+              type: "moving",
+              initialLogicalPoint: controlMode.initialLogicalPoint,
+              currentLogicalPoint: canvasInfo.clientToLogicalPoint([
+                e.clientX,
+                e.clientY,
+              ]),
+            },
+          });
+          break;
+        case "moving":
+          this.setState({
+            controlMode: {
+              ...controlMode,
+              currentLogicalPoint: canvasInfo.clientToLogicalPoint([
+                e.clientX,
+                e.clientY,
+              ]),
+            },
+          });
+      }
     }
   };
 
@@ -121,22 +137,10 @@ class OvalInner extends Component<InnerProps, InnerState> {
     const { controlMode } = this.state;
     let { pos_x, pos_y } = this.props.material!;
     if (controlMode?.type == "moving") {
-      const [
-        initialX,
-        initialY,
-      ] = this.props.panzoomObservable.domToLogicalPoint(
-        controlMode.initialMousePos
-      );
-      const [
-        currentX,
-        currentY,
-      ] = this.props.panzoomObservable.domToLogicalPoint(
-        controlMode.currentMousePos
-      );
-      const dx = currentX - initialX;
-      const dy = currentY - initialY;
-      pos_x += dx;
-      pos_y += dy;
+      pos_x +=
+        controlMode.currentLogicalPoint[0] - controlMode.initialLogicalPoint[0];
+      pos_y +=
+        controlMode.currentLogicalPoint[1] - controlMode.initialLogicalPoint[1];
     }
     return [pos_x, pos_y];
   }
@@ -175,10 +179,12 @@ function Oval(props: Props) {
   const system = useSystemFacade();
   const panzoomObservable = usePanzoomObservable();
   const selected = focused === props.material?.id;
+  const canvasInfo = useCanvasInfo();
   return (
     <OvalInner
       selected={selected}
       panzoomObservable={panzoomObservable}
+      canvasInfo={canvasInfo}
       {...props}
       onSelect={() => {
         if (props.material) {
