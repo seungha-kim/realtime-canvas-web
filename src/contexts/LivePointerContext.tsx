@@ -9,34 +9,44 @@ import {
   map,
   mergeWith,
   sample,
+  takeUntil,
 } from "rxjs/operators";
 import {
   LivePointerCommand,
   LivePointerEvent,
   SystemFacade,
 } from "../SystemFacade";
+import { Disposable } from "../utils/Disposable";
 
 export interface LivePointerPushable {
   pushEvent(e: LivePointerCommand): void;
 }
 
-class LivePointerManager implements LivePointerPushable {
+class LivePointerManager implements LivePointerPushable, Disposable {
   systemFacade: SystemFacade;
   livePointerEvent$: Observable<LivePointerEvent>;
 
   private livePointerCommand$ = new Subject<LivePointerCommand>();
   private livePointerSendInterval$ = interval(100);
-  // TODO: dispose
-  private livePointerCommandSubscription = this.livePointerCommand$
-    .pipe(sample(this.livePointerSendInterval$), distinctUntilChanged())
-    .subscribe((c) => {
-      this.systemFacade.sendLivePointer(c);
-    });
+  private teardown$ = new Subject<void>();
 
   constructor(systemFacade: SystemFacade) {
     this.systemFacade = systemFacade;
-    systemFacade.materializeSession();
-    this.livePointerEvent$ = this.systemFacade.livePointerEvent$;
+    this.livePointerEvent$ = systemFacade.livePointerEvent$;
+
+    this.livePointerCommand$
+      .pipe(
+        takeUntil(this.teardown$),
+        sample(this.livePointerSendInterval$),
+        distinctUntilChanged()
+      )
+      .subscribe((c) => {
+        this.systemFacade.sendLivePointer(c);
+      });
+  }
+
+  dispose(): void {
+    this.teardown$.next();
   }
 
   pushEvent(c: LivePointerCommand) {
@@ -72,6 +82,10 @@ export class LivePointerProvider extends Component<
   {}
 > {
   livePointerManager = new LivePointerManager(this.props.systemFacade);
+
+  componentWillUnmount() {
+    this.livePointerManager.dispose();
+  }
 
   render() {
     return (
