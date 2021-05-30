@@ -1,5 +1,5 @@
 import { ComponentChildren, h } from "preact";
-import { interval, Observable, Subject } from "rxjs";
+import { Observable, Subject } from "rxjs";
 import { Component, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import {
@@ -8,7 +8,7 @@ import {
   filter,
   map,
   mergeWith,
-  sample,
+  sampleTime,
   takeUntil,
 } from "rxjs/operators";
 import {
@@ -27,7 +27,6 @@ class LivePointerManager implements LivePointerPushable, Disposable {
   livePointerEvent$: Observable<LivePointerEvent>;
 
   private livePointerCommand$ = new Subject<LivePointerCommand>();
-  private livePointerSendInterval$ = interval(100);
   private teardown$ = new Subject<void>();
 
   constructor(systemFacade: SystemFacade) {
@@ -35,11 +34,7 @@ class LivePointerManager implements LivePointerPushable, Disposable {
     this.livePointerEvent$ = systemFacade.livePointerEvent$;
 
     this.livePointerCommand$
-      .pipe(
-        takeUntil(this.teardown$),
-        sample(this.livePointerSendInterval$),
-        distinctUntilChanged()
-      )
+      .pipe(takeUntil(this.teardown$), sampleTime(100), distinctUntilChanged())
       .subscribe((c) => {
         this.systemFacade.sendLivePointer(c);
       });
