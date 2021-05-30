@@ -11,6 +11,11 @@ import {
 import { CanvasInfo, CanvasInfoProvider } from "../contexts/CanvasInfoContext";
 import { BehaviorSubject, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { LivePointerListView } from "./LivePointerView";
+import {
+  LivePointerPushable,
+  useLivePointerPushable,
+} from "../contexts/LivePointerContext";
 
 type Props = {};
 
@@ -18,6 +23,7 @@ type InnerProps = Props & {
   document: DocumentMaterial;
   system: SystemFacade;
   panzoom$: PanzoomObservable;
+  livePointerPushable: LivePointerPushable;
 };
 
 enum PanningStateType {
@@ -217,26 +223,41 @@ class CanvasInner extends Component<InnerProps, {}> {
     }
   };
 
+  handleMouseMove = (e: MouseEvent) => {
+    const [logicalX, logicalY] = this.canvasInfo.clientToLogicalPoint([
+      e.clientX,
+      e.clientY,
+    ]);
+    this.props.livePointerPushable.pushEvent({
+      x: logicalX,
+      y: logicalY,
+    });
+  };
+
   render() {
     return (
       <CanvasInfoProvider canvasInfo={this.canvasInfo}>
-        <svg
-          ref={this.svgRef}
-          onMouseDown={this.handleMouseDown}
-          onWheel={this.handleWheel}
-          onClick={this.handleClick}
-          width={500}
-          height={500}
-          style={{
-            border: "1px solid red",
-          }}
-        >
-          <g ref={this.outerGroupRef}>
-            {this.props.document.children.map((child) => {
-              return <DrawingObject objectId={child} />;
-            })}
-          </g>
-        </svg>
+        <div style={{ position: "relative" }}>
+          <svg
+            ref={this.svgRef}
+            onMouseDown={this.handleMouseDown}
+            onWheel={this.handleWheel}
+            onClick={this.handleClick}
+            onMouseMove={this.handleMouseMove}
+            width={500}
+            height={500}
+            style={{
+              border: "1px solid red",
+            }}
+          >
+            <g ref={this.outerGroupRef}>
+              {this.props.document.children.map((child) => {
+                return <DrawingObject objectId={child} />;
+              })}
+            </g>
+          </svg>
+          <LivePointerListView />
+        </div>
       </CanvasInfoProvider>
     );
   }
@@ -246,12 +267,14 @@ function Canvas(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
   const panzoomObservable = usePanzoom$();
+  const livePointerPushable = useLivePointerPushable();
   return (
     document && (
       <CanvasInner
         document={document}
         system={system}
         panzoom$={panzoomObservable}
+        livePointerPushable={livePointerPushable}
         {...props}
       />
     )

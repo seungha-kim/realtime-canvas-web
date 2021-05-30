@@ -43,6 +43,13 @@ export class PanzoomObservable extends BehaviorSubject<Panzoom> {
     ];
   }
 
+  logicalToDomPoint([x, y]: [number, number]): [number, number] {
+    return [
+      this.value.zoomLevel * (x - this.value.panX),
+      this.value.zoomLevel * (y - this.value.panY),
+    ];
+  }
+
   domToLogicalLength(length: number): number {
     return length / this.value.zoomLevel;
   }

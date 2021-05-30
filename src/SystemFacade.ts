@@ -2,12 +2,17 @@
 import mod from "./wasm/realtime-canvas_bg.wasm";
 // @ts-ignore
 import init, { CanvasSystem } from "./wasm/realtime-canvas";
+import { Subject } from "rxjs";
 
-export interface Fragment {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+export interface LivePointerEvent {
+  connection_id: number;
+  x: number;
+  y: number;
+}
+
+export interface LivePointerCommand {
+  x: number;
+  y: number;
 }
 
 type ConnectionId = number;
@@ -18,7 +23,7 @@ export type SystemEvent = {
   JoinedSession?: { session_id: SessionId };
   LeftSession?: null;
   SessionEvent?: {
-    Fragment?: Fragment;
+    LivePointer?: LivePointerEvent;
     SomeoneJoined: ConnectionId;
     SomeoneLeft: ConnectionId;
   };
@@ -28,7 +33,7 @@ type SystemCommand = {
   CreateSession?: null;
   JoinSession?: { session_id: SessionId };
   LeaveSession?: null;
-  SessionCommand?: { Fragment: Fragment };
+  SessionCommand?: { LivePointer: LivePointerCommand };
 };
 
 interface IdentifiableEvent {
@@ -93,6 +98,7 @@ export class SystemFacade {
     Set<InvalidationListener>
   > = new Map();
   private sessionSnapshotChangeListeners: Set<SessionSnapshotListener> = new Set();
+  livePointerEvent$ = new Subject<LivePointerEvent>();
 
   static async create(url: string): Promise<SystemFacade> {
     await init(mod);
@@ -121,6 +127,7 @@ export class SystemFacade {
       this.system.handle_event_from_server(buf);
       this.notifyObjectInvalidation();
       this.notifySessionSnapshotInvalidation();
+      this.notifyLivePointerEvents();
     });
   }
 
@@ -142,10 +149,10 @@ export class SystemFacade {
     });
   }
 
-  sendFragment(fragment: Fragment) {
+  sendLivePointer(livePointer: LivePointerCommand) {
     return this.sendCommand(
       {
-        SessionCommand: { Fragment: fragment },
+        SessionCommand: { LivePointer: livePointer },
       },
       false
     );
@@ -216,6 +223,16 @@ export class SystemFacade {
     }
   }
 
+  private notifyLivePointerEvents() {
+    const json = this.system.consume_live_pointer_events();
+    if (json) {
+      const parsed = JSON.parse(json);
+      for (const e of parsed) {
+        this.livePointerEvent$.next(e);
+      }
+    }
+  }
+
   private sendCommand(command: SystemCommand): Promise<SystemEvent>;
   private sendCommand(
     command: SystemCommand,
@@ -266,7 +283,7 @@ export class SystemFacade {
     if (process.env.NODE_ENV == "production") {
       return;
     }
-    if (command.SessionCommand?.Fragment) {
+    if (command.SessionCommand?.LivePointer) {
       console.debug(this.formatJson(command));
     } else {
       console.info(this.formatJson(command));

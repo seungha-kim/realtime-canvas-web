@@ -7,6 +7,8 @@ import LayerPanel from "../components/LayerPanel";
 import AttrPanel from "../components/AttrPanel";
 import { FocusProvider } from "../contexts/FocusContext";
 import { PanzoomProvider } from "../contexts/PanzoomContext";
+import { LivePointerProvider } from "../contexts/LivePointerContext";
+import { useSystemFacade } from "../contexts/SystemFacadeContext";
 
 type Props = {
   onLeave: () => void;
@@ -30,10 +32,13 @@ function SystemConsoleInner(props: InnerProps) {
 }
 
 function SystemConsole(props: Props) {
+  const systemFacade = useSystemFacade();
   return (
     <FocusProvider>
       <PanzoomProvider>
-        <SystemConsoleInner {...props} />
+        <LivePointerProvider systemFacade={systemFacade}>
+          <SystemConsoleInner {...props} />
+        </LivePointerProvider>
       </PanzoomProvider>
     </FocusProvider>
   );
