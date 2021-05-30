@@ -19,7 +19,20 @@ export type Focus =
       id: string;
     };
 
-const FocusContext = createContext<BehaviorSubject<Focus>>(null as any);
+class FocusObservable extends BehaviorSubject<Focus> {
+  focusedObjectId$ = this.pipe(
+    map((focus) => {
+      if (focus) {
+        return focus.id;
+      } else {
+        return null;
+      }
+    }),
+    distinctUntilChanged()
+  );
+}
+
+const FocusContext = createContext<FocusObservable>(null as any);
 
 type Props = {
   children: ComponentChildren;
@@ -28,7 +41,7 @@ type Props = {
 type State = {};
 
 export class FocusProvider extends Component<Props, State> {
-  focus$ = new BehaviorSubject<Focus>(null);
+  focus$ = new FocusObservable(null);
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleGlobalKeyDown);
@@ -67,23 +80,10 @@ export function useFocusedObjectId() {
   const focus$ = useFocus$();
   const [editingObjectId, setEditingObjectId] = useState<string | null>(null);
   useEffect(() => {
-    const sub = focus$
-      .pipe(
-        map((focus) => {
-          if (focus) {
-            return focus.id;
-          } else {
-            return null;
-          }
-        }),
-        distinctUntilChanged()
-      )
-      .subscribe((id) => {
-        setEditingObjectId(id);
-      });
-    return () => {
-      sub.unsubscribe();
-    };
+    const sub = focus$.focusedObjectId$.subscribe((id) => {
+      setEditingObjectId(id);
+    });
+    return () => sub.unsubscribe();
   }, []);
   return editingObjectId;
 }
