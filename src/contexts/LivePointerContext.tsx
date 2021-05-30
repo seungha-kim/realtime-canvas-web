@@ -6,7 +6,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
-  map,
+  mapTo,
   mergeWith,
   sampleTime,
   takeUntil,
@@ -58,7 +58,7 @@ class LivePointerManager implements LivePointerPushable, Disposable {
 
     const debouncedNull$ = filtered$.pipe(
       debounceTime(livingDuration),
-      map(() => null)
+      mapTo(null)
     );
 
     return filtered$.pipe(mergeWith(debouncedNull$));
