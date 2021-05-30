@@ -9,6 +9,7 @@ import {
   usePanzoomObservable,
 } from "../contexts/PanzoomContext";
 import { CanvasInfo, CanvasInfoProvider } from "../contexts/CanvasInfoContext";
+import { Observable } from "../utils/Observable";
 
 type Props = {};
 
@@ -42,19 +43,23 @@ type PanningState =
 class CanvasInner extends Component<InnerProps, {}> {
   svgRef = createRef<SVGSVGElement>();
   outerGroupRef = createRef<SVGGElement>();
-  panningState: PanningState = { type: PanningStateType.idle };
+  panningState = new Observable<PanningState>({
+    type: PanningStateType.idle,
+  });
   canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoomObservable);
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleGlobalKeyDown);
     document.addEventListener("keyup", this.handleGlobalKeyUp);
     this.props.panzoomObservable.addObserver(this.applyTransform);
+    this.panningState.addObserver(this.handlePanningStateUpdate);
   }
 
   componentWillUnmount() {
     document.removeEventListener("keydown", this.handleGlobalKeyDown);
     document.removeEventListener("keyup", this.handleGlobalKeyUp);
     this.props.panzoomObservable.removeObserver(this.applyTransform);
+    this.panningState.removeObserver(this.handlePanningStateUpdate);
   }
 
   handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -79,13 +84,13 @@ class CanvasInner extends Component<InnerProps, {}> {
   };
 
   handleGlobalMouseMove = (e: MouseEvent) => {
-    if (this.panningState.type === PanningStateType.panning) {
+    if (this.panningState.value.type === PanningStateType.panning) {
       const {
         initialPanX,
         initialPanY,
         initialClientX,
         initialClientY,
-      } = this.panningState;
+      } = this.panningState.value;
       const [
         initialLogicalX,
         initialLogicalY,
@@ -112,7 +117,7 @@ class CanvasInner extends Component<InnerProps, {}> {
   handleWheel = (e: WheelEvent) => {
     e.preventDefault();
 
-    if (this.panningState.type !== PanningStateType.idle) {
+    if (this.panningState.value.type !== PanningStateType.idle) {
       return;
     }
 
@@ -128,57 +133,57 @@ class CanvasInner extends Component<InnerProps, {}> {
   };
 
   handleClick = (e: MouseEvent) => {
-    if (this.panningState.type !== PanningStateType.idle) {
+    if (this.panningState.value.type !== PanningStateType.idle) {
       // NOTE: to prevent from focusing out by global click handler
       e.stopPropagation();
     }
   };
 
   preparePanning = () => {
-    if (this.panningState.type !== PanningStateType.idle) {
+    if (this.panningState.value.type !== PanningStateType.idle) {
       return;
     }
-    this.panningState = { type: PanningStateType.ready };
+    this.panningState.updateValue({ type: PanningStateType.ready });
     this.svgRef.current!.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("keyup", this.handleGlobalKeyUp);
     this.outerGroupRef.current!.style.pointerEvents = "none";
   };
 
   startPanning = (initialClientX: number, initialClientY: number) => {
-    if (this.panningState.type !== PanningStateType.ready) {
+    if (this.panningState.value.type !== PanningStateType.ready) {
       return;
     }
-    this.panningState = {
+    this.panningState.updateValue({
       type: PanningStateType.panning,
       initialPanX: this.props.panzoomObservable.value.panX,
       initialPanY: this.props.panzoomObservable.value.panY,
       initialClientX,
       initialClientY,
-    };
+    });
     document.addEventListener("mousemove", this.handleGlobalMouseMove);
     document.addEventListener("mouseup", this.handleGlobalMouseUp);
   };
 
   pausePanning = () => {
-    if (this.panningState.type !== PanningStateType.panning) {
+    if (this.panningState.value.type !== PanningStateType.panning) {
       return;
     }
-    this.panningState = { type: PanningStateType.ready };
+    this.panningState.updateValue({ type: PanningStateType.ready });
     document.removeEventListener("mousemove", this.handleGlobalMouseMove);
     document.removeEventListener("mouseup", this.handleGlobalMouseUp);
   };
 
   finishPanning = () => {
     if (
-      this.panningState.type !== PanningStateType.panning &&
-      this.panningState.type !== PanningStateType.ready
+      this.panningState.value.type !== PanningStateType.panning &&
+      this.panningState.value.type !== PanningStateType.ready
     ) {
       return;
     }
-    if (this.panningState.type === PanningStateType.panning) {
+    if (this.panningState.value.type === PanningStateType.panning) {
       this.pausePanning();
     }
-    this.panningState = { type: PanningStateType.idle };
+    this.panningState.updateValue({ type: PanningStateType.idle });
     this.svgRef.current!.removeEventListener("mousedown", this.handleMouseDown);
     document.removeEventListener("keyup", this.handleGlobalKeyUp);
     this.outerGroupRef.current!.style.pointerEvents = "auto";
@@ -198,8 +203,15 @@ class CanvasInner extends Component<InnerProps, {}> {
     );
   };
 
+  handlePanningStateUpdate = (newValue: PanningState) => {
+    if (newValue.type !== PanningStateType.idle) {
+      this.svgRef.current!.style.cursor = "grab";
+    } else {
+      this.svgRef.current!.style.cursor = "auto";
+    }
+  };
+
   render() {
-    const toBePanned = this.panningState.type !== PanningStateType.idle;
     return (
       <CanvasInfoProvider canvasInfo={this.canvasInfo}>
         <svg
