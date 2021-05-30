@@ -1,6 +1,6 @@
-import { h, Component, ComponentChildren, createContext } from "preact";
-import { useContext, useEffect, useState } from "preact/hooks";
-import { Observable } from "../utils/Observable";
+import { h, Component, createContext } from "preact";
+import { useContext } from "preact/hooks";
+import { BehaviorSubject } from "rxjs";
 
 export type Panzoom = {
   panX: number;
@@ -8,9 +8,9 @@ export type Panzoom = {
   zoomLevel: number;
 };
 
-export class PanzoomObservable extends Observable<Panzoom> {
+export class PanzoomObservable extends BehaviorSubject<Panzoom> {
   pan = (panX: number, panY: number) => {
-    this.updateValue({
+    this.next({
       ...this.value,
       panX,
       panY,
@@ -28,7 +28,7 @@ export class PanzoomObservable extends Observable<Panzoom> {
 
     const scale = newZoomLevel / zoomLevel;
 
-    this.updateValue({
+    this.next({
       ...this.value,
       zoomLevel: newZoomLevel,
       panX: (panX + scale * logicalPivotX - logicalPivotX) / scale,
@@ -66,6 +66,6 @@ export class PanzoomProvider extends Component {
   }
 }
 
-export function usePanzoomObservable() {
+export function usePanzoom$() {
   return useContext(PanzoomContext);
 }

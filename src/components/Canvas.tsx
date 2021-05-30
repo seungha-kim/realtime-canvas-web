@@ -6,17 +6,18 @@ import { useDocumentMaterial } from "../hooks";
 import {
   Panzoom,
   PanzoomObservable,
-  usePanzoomObservable,
+  usePanzoom$,
 } from "../contexts/PanzoomContext";
 import { CanvasInfo, CanvasInfoProvider } from "../contexts/CanvasInfoContext";
-import { Observable } from "../utils/Observable";
+import { BehaviorSubject, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 type Props = {};
 
 type InnerProps = Props & {
   document: DocumentMaterial;
   system: SystemFacade;
-  panzoomObservable: PanzoomObservable;
+  panzoom$: PanzoomObservable;
 };
 
 enum PanningStateType {
@@ -43,23 +44,28 @@ type PanningState =
 class CanvasInner extends Component<InnerProps, {}> {
   svgRef = createRef<SVGSVGElement>();
   outerGroupRef = createRef<SVGGElement>();
-  panningState = new Observable<PanningState>({
+
+  panningState$ = new BehaviorSubject<PanningState>({
     type: PanningStateType.idle,
   });
-  canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoomObservable);
+  canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoom$);
+  teardown$ = new Subject<void>();
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleGlobalKeyDown);
     document.addEventListener("keyup", this.handleGlobalKeyUp);
-    this.props.panzoomObservable.addObserver(this.applyTransform);
-    this.panningState.addObserver(this.handlePanningStateUpdate);
+    this.panningState$
+      .pipe(takeUntil(this.teardown$))
+      .subscribe(this.handlePanningStateUpdate);
+    this.props.panzoom$
+      .pipe(takeUntil(this.teardown$))
+      .subscribe(this.applyTransform);
   }
 
   componentWillUnmount() {
     document.removeEventListener("keydown", this.handleGlobalKeyDown);
     document.removeEventListener("keyup", this.handleGlobalKeyUp);
-    this.props.panzoomObservable.removeObserver(this.applyTransform);
-    this.panningState.removeObserver(this.handlePanningStateUpdate);
+    this.teardown$.next();
   }
 
   handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -84,13 +90,13 @@ class CanvasInner extends Component<InnerProps, {}> {
   };
 
   handleGlobalMouseMove = (e: MouseEvent) => {
-    if (this.panningState.value.type === PanningStateType.panning) {
+    if (this.panningState$.value.type === PanningStateType.panning) {
       const {
         initialPanX,
         initialPanY,
         initialClientX,
         initialClientY,
-      } = this.panningState.value;
+      } = this.panningState$.value;
       const [
         initialLogicalX,
         initialLogicalY,
@@ -103,7 +109,7 @@ class CanvasInner extends Component<InnerProps, {}> {
         currentLogicalY,
       ] = this.canvasInfo.clientToLogicalPoint([e.clientX, e.clientY]);
 
-      this.props.panzoomObservable.pan(
+      this.props.panzoom$.pan(
         initialPanX - currentLogicalX + initialLogicalX,
         initialPanY - currentLogicalY + initialLogicalY
       );
@@ -117,46 +123,46 @@ class CanvasInner extends Component<InnerProps, {}> {
   handleWheel = (e: WheelEvent) => {
     e.preventDefault();
 
-    if (this.panningState.value.type !== PanningStateType.idle) {
+    if (this.panningState$.value.type !== PanningStateType.idle) {
       return;
     }
 
-    const { panzoomObservable } = this.props;
-    const { zoomLevel } = panzoomObservable.value;
+    const { panzoom$ } = this.props;
+    const { zoomLevel } = panzoom$.value;
     let newZoomLevel = zoomLevel + e.deltaY * -0.01;
     const [logicalX, logicalY] = this.canvasInfo.clientToLogicalPoint([
       e.clientX,
       e.clientY,
     ]);
 
-    panzoomObservable.zoom(newZoomLevel, logicalX, logicalY);
+    panzoom$.zoom(newZoomLevel, logicalX, logicalY);
   };
 
   handleClick = (e: MouseEvent) => {
-    if (this.panningState.value.type !== PanningStateType.idle) {
+    if (this.panningState$.value.type !== PanningStateType.idle) {
       // NOTE: to prevent from focusing out by global click handler
       e.stopPropagation();
     }
   };
 
   preparePanning = () => {
-    if (this.panningState.value.type !== PanningStateType.idle) {
+    if (this.panningState$.value.type !== PanningStateType.idle) {
       return;
     }
-    this.panningState.updateValue({ type: PanningStateType.ready });
+    this.panningState$.next({ type: PanningStateType.ready });
     this.svgRef.current!.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("keyup", this.handleGlobalKeyUp);
     this.outerGroupRef.current!.style.pointerEvents = "none";
   };
 
   startPanning = (initialClientX: number, initialClientY: number) => {
-    if (this.panningState.value.type !== PanningStateType.ready) {
+    if (this.panningState$.value.type !== PanningStateType.ready) {
       return;
     }
-    this.panningState.updateValue({
+    this.panningState$.next({
       type: PanningStateType.panning,
-      initialPanX: this.props.panzoomObservable.value.panX,
-      initialPanY: this.props.panzoomObservable.value.panY,
+      initialPanX: this.props.panzoom$.value.panX,
+      initialPanY: this.props.panzoom$.value.panY,
       initialClientX,
       initialClientY,
     });
@@ -165,25 +171,25 @@ class CanvasInner extends Component<InnerProps, {}> {
   };
 
   pausePanning = () => {
-    if (this.panningState.value.type !== PanningStateType.panning) {
+    if (this.panningState$.value.type !== PanningStateType.panning) {
       return;
     }
-    this.panningState.updateValue({ type: PanningStateType.ready });
+    this.panningState$.next({ type: PanningStateType.ready });
     document.removeEventListener("mousemove", this.handleGlobalMouseMove);
     document.removeEventListener("mouseup", this.handleGlobalMouseUp);
   };
 
   finishPanning = () => {
     if (
-      this.panningState.value.type !== PanningStateType.panning &&
-      this.panningState.value.type !== PanningStateType.ready
+      this.panningState$.value.type !== PanningStateType.panning &&
+      this.panningState$.value.type !== PanningStateType.ready
     ) {
       return;
     }
-    if (this.panningState.value.type === PanningStateType.panning) {
+    if (this.panningState$.value.type === PanningStateType.panning) {
       this.pausePanning();
     }
-    this.panningState.updateValue({ type: PanningStateType.idle });
+    this.panningState$.next({ type: PanningStateType.idle });
     this.svgRef.current!.removeEventListener("mousedown", this.handleMouseDown);
     document.removeEventListener("keyup", this.handleGlobalKeyUp);
     this.outerGroupRef.current!.style.pointerEvents = "auto";
@@ -239,13 +245,13 @@ class CanvasInner extends Component<InnerProps, {}> {
 function Canvas(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
-  const panzoomObservable = usePanzoomObservable();
+  const panzoomObservable = usePanzoom$();
   return (
     document && (
       <CanvasInner
         document={document}
         system={system}
-        panzoomObservable={panzoomObservable}
+        panzoom$={panzoomObservable}
         {...props}
       />
     )

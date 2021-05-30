@@ -1,8 +1,7 @@
 import { h, Component, ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
-import { Observable } from "../utils/Observable";
-
-type FocusObservable = Observable<Focus>;
+import { BehaviorSubject } from "rxjs";
+import { distinctUntilChanged, map } from "rxjs/operators";
 
 export enum FocusType {
   layerPanelItem,
@@ -20,7 +19,7 @@ export type Focus =
       id: string;
     };
 
-const FocusContext = createContext<Observable<Focus>>(null as any);
+const FocusContext = createContext<BehaviorSubject<Focus>>(null as any);
 
 type Props = {
   children: ComponentChildren;
@@ -29,7 +28,7 @@ type Props = {
 type State = {};
 
 export class FocusProvider extends Component<Props, State> {
-  observable = new Observable<Focus>(null);
+  focus$ = new BehaviorSubject<Focus>(null);
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleGlobalKeyDown);
@@ -43,54 +42,48 @@ export class FocusProvider extends Component<Props, State> {
 
   handleGlobalKeyDown = (e: KeyboardEvent) => {
     if (e.code === "Escape") {
-      this.observable.updateValue(null);
+      this.focus$.next(null);
     }
   };
 
   handleGlobalClick = () => {
-    this.observable.updateValue(null);
+    this.focus$.next(null);
   };
 
   render() {
     return (
-      <FocusContext.Provider value={this.observable}>
+      <FocusContext.Provider value={this.focus$}>
         {this.props.children}
       </FocusContext.Provider>
     );
   }
 }
 
-export function useFocusSelector<
-  S extends (focus: Focus) => any,
-  R extends ReturnType<S>
->(selector: S): [R, FocusObservable["updateValue"]] {
-  const focusObservable = useContext(FocusContext);
-  const [memo, setMemo] = useState<R>(selector(focusObservable.value));
-
-  // NOTE: selector must be same across rendering
-  useEffect(() => {
-    const observer = (newValue: Focus) => {
-      const newMemo = selector(newValue);
-      if (memo !== newMemo) {
-        setMemo(newMemo);
-      }
-    };
-    focusObservable.addObserver(observer);
-    return () => {
-      focusObservable.removeObserver(observer);
-    };
-  }, [memo]);
-
-  return [memo, focusObservable.updateValue];
+export function useFocus$() {
+  return useContext(FocusContext);
 }
 
-export function selectFocusedObjectId(focus: Focus): string | null {
-  if (
-    focus?.type == FocusType.layerPanelItem ||
-    focus?.type == FocusType.canvasObject
-  ) {
-    return focus.id;
-  } else {
-    return null;
-  }
+export function useFocusedObjectId() {
+  const focus$ = useFocus$();
+  const [editingObjectId, setEditingObjectId] = useState<string | null>(null);
+  useEffect(() => {
+    const sub = focus$
+      .pipe(
+        map((focus) => {
+          if (focus) {
+            return focus.id;
+          } else {
+            return null;
+          }
+        }),
+        distinctUntilChanged()
+      )
+      .subscribe((id) => {
+        setEditingObjectId(id);
+      });
+    return () => {
+      sub.unsubscribe();
+    };
+  }, []);
+  return editingObjectId;
 }

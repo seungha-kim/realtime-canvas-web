@@ -5,8 +5,8 @@ import { useDocumentMaterial } from "../hooks";
 import LayerPanelItem from "./LayerPanelItem";
 import {
   FocusType,
-  selectFocusedObjectId,
-  useFocusSelector,
+  useFocus$,
+  useFocusedObjectId,
 } from "../contexts/FocusContext";
 
 type Props = {};
@@ -65,14 +65,15 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 function LayerPanel(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
-  const [focused, updateFocus] = useFocusSelector(selectFocusedObjectId);
+  const focus$ = useFocus$();
+  const focusedObjectId = useFocusedObjectId();
   return (
     <LayerPanelInner
       document={document}
       system={system}
-      focusedObjectId={focused}
+      focusedObjectId={focusedObjectId}
       onLayerSelected={(id) => {
-        updateFocus({
+        focus$.next({
           type: FocusType.layerPanelItem,
           id,
         });

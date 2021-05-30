@@ -2,14 +2,11 @@ import { Component, h, Fragment } from "preact";
 import { ObjectMaterial } from "../../SystemFacade";
 import {
   FocusType,
-  selectFocusedObjectId,
-  useFocusSelector,
+  useFocus$,
+  useFocusedObjectId,
 } from "../../contexts/FocusContext";
 import { useSystemFacade } from "../../contexts/SystemFacadeContext";
-import {
-  PanzoomObservable,
-  usePanzoomObservable,
-} from "../../contexts/PanzoomContext";
+import { PanzoomObservable, usePanzoom$ } from "../../contexts/PanzoomContext";
 import { CanvasInfo, useCanvasInfo } from "../../contexts/CanvasInfoContext";
 
 type Props = {
@@ -175,10 +172,11 @@ class OvalInner extends Component<InnerProps, InnerState> {
 }
 
 function Oval(props: Props) {
-  const [focused, updateFocus] = useFocusSelector(selectFocusedObjectId);
+  const focusedObjectId = useFocusedObjectId();
+  const focus$ = useFocus$();
   const system = useSystemFacade();
-  const panzoomObservable = usePanzoomObservable();
-  const selected = focused === props.material?.id;
+  const panzoomObservable = usePanzoom$();
+  const selected = focusedObjectId === props.material?.id;
   const canvasInfo = useCanvasInfo();
   return (
     <OvalInner
@@ -188,7 +186,7 @@ function Oval(props: Props) {
       {...props}
       onSelect={() => {
         if (props.material) {
-          updateFocus({
+          focus$.next({
             type: FocusType.canvasObject,
             id: props.material.id,
           });
