@@ -1,13 +1,23 @@
 import { h, Component } from "preact";
 import { ObjectMaterial } from "../../SystemFacade";
+import { useSystemFacade } from "../../contexts/SystemFacadeContext";
+import { useFocus$ } from "../../contexts/FocusContext";
 
 type Props = {
   oval: NonNullable<ObjectMaterial["Oval"]>;
 };
 
-type InnerProps = Props & {};
+type InnerProps = Props & {
+  onObjectDeletion: () => void;
+};
 
 class OvalAttrInner extends Component<InnerProps, {}> {
+  handleDeleteButtonClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.props.onObjectDeletion();
+  };
+
   render() {
     const { oval } = this.props;
     return (
@@ -31,13 +41,24 @@ class OvalAttrInner extends Component<InnerProps, {}> {
           <dt>V radius</dt>
           <dd>{oval.r_v}</dd>
         </dl>
+        <button onClick={this.handleDeleteButtonClick}>delete</button>
       </div>
     );
   }
 }
 
 function OvalAttr(props: Props) {
-  return <OvalAttrInner oval={props.oval} />;
+  const system = useSystemFacade();
+  const focus$ = useFocus$();
+  return (
+    <OvalAttrInner
+      oval={props.oval}
+      onObjectDeletion={() => {
+        system.pushDocumentCommand({ DeleteObject: { id: props.oval.id } });
+        focus$.focusOut();
+      }}
+    />
+  );
 }
 
 export default OvalAttr;

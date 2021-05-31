@@ -30,6 +30,10 @@ class FocusObservable extends BehaviorSubject<Focus> {
     }),
     distinctUntilChanged()
   );
+
+  focusOut() {
+    this.next(null);
+  }
 }
 
 const FocusContext = createContext<FocusObservable>(null as any);
