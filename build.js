@@ -6,6 +6,7 @@ const buildOption = {
     "process.env.NODE_ENV": process.env.NODE_ENV
       ? `"${process.env.NODE_ENV}"`
       : '""',
+    "process.env.WS_HOST": `"${process.env.WS_HOST}"` || `"localhost:8080"`,
   },
   logLevel: "info",
   sourcemap: true,

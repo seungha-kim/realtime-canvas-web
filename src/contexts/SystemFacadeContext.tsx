@@ -10,7 +10,7 @@ type Props = {
 
 export function SystemFacadeProvider(props: Props) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const host = "localhost:8080";
+  const host = process.env.WS_HOST;
   const [facade, setFacade] = useState<SystemFacade>(null as any);
   useEffect(() => {
     (async () => {
