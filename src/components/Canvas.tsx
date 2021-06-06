@@ -252,7 +252,7 @@ class CanvasInner extends Component<InnerProps, {}> {
           >
             <g ref={this.outerGroupRef}>
               {this.props.document.children.map((child) => {
-                return <DrawingObject objectId={child} />;
+                return <DrawingObject key={child} objectId={child} />;
               })}
             </g>
           </svg>
