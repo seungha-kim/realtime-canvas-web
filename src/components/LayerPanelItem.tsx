@@ -1,6 +1,6 @@
 import { h } from "preact";
 import { ObjectMaterial } from "../SystemFacade";
-import { useObjectMaterial } from "../hooks";
+import { useObjectMaterial } from "../contexts/MaterialBroadcastContext";
 
 type Props = {
   id: string;

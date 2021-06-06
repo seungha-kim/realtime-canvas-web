@@ -2,7 +2,7 @@ import { h, Component, createRef } from "preact";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import DrawingObject from "./drawing/DrawingObject";
-import { useDocumentMaterial } from "../hooks";
+import { useDocumentMaterial } from "../contexts/MaterialBroadcastContext";
 import {
   Panzoom,
   PanzoomObservable,

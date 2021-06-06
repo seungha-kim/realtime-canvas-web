@@ -1,5 +1,8 @@
 import { h } from "preact";
-import { useDocumentMaterial, useObjectMaterial } from "../../hooks";
+import {
+  useDocumentMaterial,
+  useObjectMaterial,
+} from "../../contexts/MaterialBroadcastContext";
 import OvalAttr from "./OvalAttr";
 
 type Props = {

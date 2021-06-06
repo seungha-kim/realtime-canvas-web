@@ -1,7 +1,7 @@
 import { h, Component } from "preact";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
-import { useDocumentMaterial } from "../hooks";
+import { useDocumentMaterial } from "../contexts/MaterialBroadcastContext";
 
 type Props = {};
 

@@ -1,6 +1,6 @@
 import { h } from "preact";
 import Oval from "./Oval";
-import { useObjectMaterial } from "../../hooks";
+import { useObjectMaterial } from "../../contexts/MaterialBroadcastContext";
 
 type Props = {
   objectId: string;

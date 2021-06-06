@@ -1,31 +1,6 @@
-import {
-  DocumentMaterial,
-  ObjectMaterial,
-  SessionSnapshot,
-} from "./SystemFacade";
+import { SessionSnapshot } from "./SystemFacade";
 import { useEffect, useState } from "preact/hooks";
 import { useSystemFacade } from "./contexts/SystemFacadeContext";
-
-export function useDocumentMaterial() {
-  const system = useSystemFacade();
-
-  const [documentMaterial, setDocumentMaterial] = useState<DocumentMaterial>(
-    () => system.materializeDocument()
-  );
-  useEffect(() => {
-    const sync = () => {
-      setDocumentMaterial(system.materializeDocument());
-    };
-
-    system.addInvalidationListener(documentMaterial.id, sync);
-
-    return () => {
-      system.removeInvalidationListener(documentMaterial.id, sync);
-    };
-  }, []);
-
-  return documentMaterial;
-}
 
 export function useSessionSnapshot() {
   const system = useSystemFacade();
@@ -48,24 +23,4 @@ export function useSessionSnapshot() {
   }, []);
 
   return sessionSnapshot;
-}
-
-export function useObjectMaterial(id: string) {
-  const system = useSystemFacade();
-
-  const [material, setMaterial] = useState<ObjectMaterial | null>(null);
-  useEffect(() => {
-    const sync = () => {
-      setMaterial(system.materializeObject(id));
-    };
-    sync();
-
-    system.addInvalidationListener(id, sync);
-
-    return () => {
-      system.removeInvalidationListener(id, sync);
-    };
-  }, [id]);
-
-  return material;
 }

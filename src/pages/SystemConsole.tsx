@@ -9,6 +9,7 @@ import { FocusProvider } from "../contexts/FocusContext";
 import { PanzoomProvider } from "../contexts/PanzoomContext";
 import { LivePointerProvider } from "../contexts/LivePointerContext";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
+import { MaterialBroadcastProvider } from "../contexts/MaterialBroadcastContext";
 
 type Props = {
   onLeave: () => void;
@@ -37,7 +38,9 @@ function SystemConsole(props: Props) {
     <FocusProvider>
       <PanzoomProvider>
         <LivePointerProvider systemFacade={systemFacade}>
-          <SystemConsoleInner {...props} />
+          <MaterialBroadcastProvider systemFacade={systemFacade}>
+            <SystemConsoleInner {...props} />
+          </MaterialBroadcastProvider>
         </LivePointerProvider>
       </PanzoomProvider>
     </FocusProvider>

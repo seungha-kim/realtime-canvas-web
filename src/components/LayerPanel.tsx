@@ -1,7 +1,7 @@
 import { Component, h } from "preact";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { DocumentMaterial, SystemFacade } from "../SystemFacade";
-import { useDocumentMaterial } from "../hooks";
+import { useDocumentMaterial } from "../contexts/MaterialBroadcastContext";
 import LayerPanelItem from "./LayerPanelItem";
 import {
   FocusType,
