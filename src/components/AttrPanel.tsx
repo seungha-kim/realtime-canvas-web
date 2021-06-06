@@ -4,7 +4,7 @@ import ObjectAttr from "./attr/ObjectAttr";
 
 function createInner(focusedObjectId: string | null) {
   if (focusedObjectId !== null) {
-    return <ObjectAttr id={focusedObjectId} />;
+    return <ObjectAttr id={focusedObjectId} key={focusedObjectId} />;
   } else {
     return null;
   }
