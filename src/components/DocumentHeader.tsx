@@ -39,17 +39,9 @@ class DocumentHeaderInner extends Component<InnerProps, InnerState> {
 
 function DocumentHeader(props: Props) {
   const system = useSystemFacade();
-  const documentMaterial = useDocumentMaterial();
+  const document = useDocumentMaterial();
 
-  return (
-    documentMaterial && (
-      <DocumentHeaderInner
-        document={documentMaterial}
-        system={system}
-        {...props}
-      />
-    )
-  );
+  return <DocumentHeaderInner document={document} system={system} {...props} />;
 }
 
 export default DocumentHeader;

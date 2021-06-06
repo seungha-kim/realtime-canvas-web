@@ -269,15 +269,13 @@ function Canvas(props: Props) {
   const panzoomObservable = usePanzoom$();
   const livePointerPushable = useLivePointerPushable();
   return (
-    document && (
-      <CanvasInner
-        document={document}
-        system={system}
-        panzoom$={panzoomObservable}
-        livePointerPushable={livePointerPushable}
-        {...props}
-      />
-    )
+    <CanvasInner
+      document={document}
+      system={system}
+      panzoom$={panzoomObservable}
+      livePointerPushable={livePointerPushable}
+      {...props}
+    />
   );
 }
 

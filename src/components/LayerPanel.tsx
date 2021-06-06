@@ -13,7 +13,7 @@ type Props = {};
 
 type InnerProps = Props & {
   system: SystemFacade;
-  document: DocumentMaterial | null;
+  document: DocumentMaterial;
   focusedObjectId: string | null;
   onLayerSelected: (id: string) => void;
 };
