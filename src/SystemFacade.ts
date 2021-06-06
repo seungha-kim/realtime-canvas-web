@@ -60,6 +60,12 @@ export type DocumentMaterial = {
   children: string[];
 };
 
+export type Color = {
+  r: number;
+  g: number;
+  b: number;
+};
+
 export type ObjectMaterial = {
   Document?: DocumentMaterial;
   Oval?: {
@@ -69,6 +75,7 @@ export type ObjectMaterial = {
     pos_y: number;
     r_h: number;
     r_v: number;
+    fill_color: Color;
   };
 };
 
@@ -78,6 +85,7 @@ export type DocumentCommand = {
     pos: [number, number];
     r_h: number;
     r_v: number;
+    fill_color: Color;
   };
   UpdateName?: { id: string; name: string };
   UpdatePosition?: { id: string; pos: [number, number] };

@@ -143,7 +143,11 @@ class OvalInner extends Component<InnerProps, InnerState> {
   }
 
   render() {
-    let { r_h, r_v } = this.props.material!;
+    let {
+      r_h,
+      r_v,
+      fill_color: { r, g, b },
+    } = this.props.material!;
     let [pos_x, pos_y] = this.controlledPosition;
 
     return (
@@ -155,6 +159,7 @@ class OvalInner extends Component<InnerProps, InnerState> {
           cy={pos_y}
           rx={r_h}
           ry={r_v}
+          fill={`rgb(${r}, ${g}, ${b})`}
         />
         {this.props.selected && (
           <rect

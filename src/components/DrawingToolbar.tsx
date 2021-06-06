@@ -17,6 +17,11 @@ class DrawingToolbarInner extends Component<InnerProps, InnerState> {
         pos: [500 * Math.random(), 500 * Math.random()],
         r_h: 30 * Math.random(),
         r_v: 30 * Math.random(),
+        fill_color: {
+          r: Math.floor(256 * Math.random()),
+          g: Math.floor(256 * Math.random()),
+          b: Math.floor(256 * Math.random()),
+        },
       },
     });
   };

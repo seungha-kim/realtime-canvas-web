@@ -49,6 +49,9 @@ class OvalAttrInner extends Component<InnerProps, {}> {
 
           <dt>V radius</dt>
           <dd>{oval.r_v}</dd>
+
+          <dt>Fill color</dt>
+          <dd>{`rgb(${oval.fill_color.r}, ${oval.fill_color.g}, ${oval.fill_color.b})`}</dd>
         </dl>
         <button onClick={this.handleDeleteButtonClick}>delete</button>
         <button onClick={this.handleFrontButtonClick}>go front</button>
