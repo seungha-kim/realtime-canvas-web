@@ -5,10 +5,13 @@ import { useFocus$ } from "../../contexts/FocusContext";
 
 type Props = {
   oval: NonNullable<ObjectMaterial["Oval"]>;
+  index: number;
 };
 
-type InnerProps = Props & {
+type InnerProps = {
+  oval: NonNullable<ObjectMaterial["Oval"]>;
   onObjectDeletion: () => void;
+  onGoingFront: () => void;
 };
 
 class OvalAttrInner extends Component<InnerProps, {}> {
@@ -16,6 +19,12 @@ class OvalAttrInner extends Component<InnerProps, {}> {
     e.preventDefault();
     e.stopPropagation();
     this.props.onObjectDeletion();
+  };
+
+  handleFrontButtonClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.props.onGoingFront();
   };
 
   render() {
@@ -42,6 +51,7 @@ class OvalAttrInner extends Component<InnerProps, {}> {
           <dd>{oval.r_v}</dd>
         </dl>
         <button onClick={this.handleDeleteButtonClick}>delete</button>
+        <button onClick={this.handleFrontButtonClick}>go front</button>
       </div>
     );
   }
@@ -56,6 +66,12 @@ function OvalAttr(props: Props) {
       onObjectDeletion={() => {
         system.pushDocumentCommand({ DeleteObject: { id: props.oval.id } });
         focus$.focusOut();
+      }}
+      onGoingFront={() => {
+        // TODO: 버튼 비활성화 or 예외 처리
+        system.pushDocumentCommand({
+          UpdateIndex: { id: props.oval.id, int_index: props.index + 2 },
+        });
       }}
     />
   );

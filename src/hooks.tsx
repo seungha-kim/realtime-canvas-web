@@ -9,17 +9,13 @@ import { useSystemFacade } from "./contexts/SystemFacadeContext";
 export function useDocumentMaterial() {
   const system = useSystemFacade();
 
-  const [
-    documentMaterial,
-    setDocumentMaterial,
-  ] = useState<DocumentMaterial | null>(null);
+  const [documentMaterial, setDocumentMaterial] = useState<DocumentMaterial>(
+    () => system.materializeDocument()
+  );
   useEffect(() => {
-    const documentMaterial = system.materializeDocument();
-
     const sync = () => {
       setDocumentMaterial(system.materializeDocument());
     };
-    sync();
 
     system.addInvalidationListener(documentMaterial.id, sync);
 

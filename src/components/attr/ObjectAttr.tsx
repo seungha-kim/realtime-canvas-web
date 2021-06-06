@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { useObjectMaterial } from "../../hooks";
+import { useDocumentMaterial, useObjectMaterial } from "../../hooks";
 import OvalAttr from "./OvalAttr";
 
 type Props = {
@@ -8,8 +8,10 @@ type Props = {
 
 function ObjectAttr(props: Props) {
   const material = useObjectMaterial(props.id);
+  const document = useDocumentMaterial();
+  const index = document!.children.findIndex((id) => id === props.id);
   if (material?.Oval) {
-    return <OvalAttr oval={material.Oval} />;
+    return <OvalAttr oval={material.Oval} index={index} />;
   } else {
     return null;
   }

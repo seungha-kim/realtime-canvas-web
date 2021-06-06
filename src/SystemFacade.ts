@@ -82,6 +82,7 @@ export type DocumentCommand = {
   UpdateName?: { id: string; name: string };
   UpdatePosition?: { id: string; pos: [number, number] };
   DeleteObject?: { id: string };
+  UpdateIndex?: { id: string; int_index: number };
 };
 
 type InvalidationListener = (objectId: string) => void;
