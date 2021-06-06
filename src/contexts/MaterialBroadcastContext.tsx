@@ -5,12 +5,16 @@ import { Component, ComponentChildren, createContext, h } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { useSystemFacade } from "./SystemFacadeContext";
 
-export class MaterialBroadcastManager {
+class MaterialBroadcastManager {
+  readonly documentId: string;
+
   private systemFacade: SystemFacade;
   private broadcastRegistry = new Map<string, Observable<ObjectMaterial>>();
+  private materialCache = new Map<string, ObjectMaterial>();
 
   constructor(systemFacade: SystemFacade) {
     this.systemFacade = systemFacade;
+    this.documentId = systemFacade.materializeDocument().id;
   }
 
   getMaterialObservable(objectId: string): Observable<ObjectMaterial> {
@@ -21,25 +25,37 @@ export class MaterialBroadcastManager {
     }
   }
 
+  getCachedMaterial(objectId: string): ObjectMaterial | null {
+    return this.materialCache.get(objectId) || null;
+  }
+
   private createMaterialObservable(
     objectId: string
   ): Observable<ObjectMaterial> {
     const subject$ = new Subject<ObjectMaterial>();
+
     const invalidationCallback = () => {
-      subject$.next(this.systemFacade.materializeObject(objectId));
+      const material = this.systemFacade.materializeObject(objectId);
+      this.materialCache.set(objectId, material);
+      subject$.next(material);
     };
-    this.systemFacade.addInvalidationListener(objectId, invalidationCallback);
-    const broadcast$ = subject$.pipe(
-      finalize(() => {
-        this.broadcastRegistry.delete(objectId);
-        this.systemFacade.removeInvalidationListener(
-          objectId,
-          invalidationCallback
-        );
-      }),
-      share()
-    );
+
+    const finalizer = () => {
+      this.materialCache.delete(objectId);
+      this.broadcastRegistry.delete(objectId);
+      this.systemFacade.removeInvalidationListener(
+        objectId,
+        invalidationCallback
+      );
+    };
+
+    const broadcast$ = subject$.pipe(finalize(finalizer), share());
+
+    const material = this.systemFacade.materializeObject(objectId);
+    this.materialCache.set(objectId, material);
     this.broadcastRegistry.set(objectId, broadcast$);
+    this.systemFacade.addInvalidationListener(objectId, invalidationCallback);
+
     return broadcast$;
   }
 }
@@ -71,10 +87,10 @@ export const useObjectMaterialObservable = (objectId: string) => {
 };
 
 export const useObjectMaterial = (objectId: string) => {
-  const systemFacade = useSystemFacade();
+  const manager = useContext(MaterialBroadcastContext);
   const material$ = useObjectMaterialObservable(objectId);
-  const [material, setMaterial] = useState(() =>
-    systemFacade.materializeObject(objectId)
+  const [material, setMaterial] = useState(
+    () => manager.getCachedMaterial(objectId)!
   );
   useEffect(() => {
     const sub = material$.subscribe((material) => {
@@ -86,10 +102,6 @@ export const useObjectMaterial = (objectId: string) => {
 };
 
 export const useDocumentMaterial = () => {
-  const systemFacade = useSystemFacade();
-  const [documentId] = useState(() => {
-    const document = systemFacade.materializeDocument();
-    return document.id;
-  });
-  return useObjectMaterial(documentId).Document!;
+  const manager = useContext(MaterialBroadcastContext);
+  return useObjectMaterial(manager.documentId).Document!;
 };
