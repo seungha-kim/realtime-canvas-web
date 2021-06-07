@@ -77,6 +77,14 @@ export type ObjectMaterial = {
     r_v: number;
     fill_color: Color;
   };
+  Frame?: {
+    id: string;
+    name: string;
+    pos_x: number;
+    pos_y: number;
+    w: number;
+    h: number;
+  };
 };
 
 export type DocumentCommand = {
@@ -86,6 +94,11 @@ export type DocumentCommand = {
     r_h: number;
     r_v: number;
     fill_color: Color;
+  };
+  CreateFrame?: {
+    pos: [number, number];
+    w: number;
+    h: number;
   };
   UpdateName?: { id: string; name: string };
   UpdatePosition?: { id: string; pos: [number, number] };

@@ -11,6 +11,7 @@ function DrawingObject(props: Props) {
   if (material?.Oval) {
     return <Oval material={material.Oval} />;
   } else {
+    console.log(`Can't draw yet: ${material}`);
     return null;
   }
 }
