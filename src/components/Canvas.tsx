@@ -9,13 +9,14 @@ import {
   usePanzoom$,
 } from "../contexts/PanzoomContext";
 import { CanvasInfo, CanvasInfoProvider } from "../contexts/CanvasInfoContext";
-import { BehaviorSubject, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { LivePointerListView } from "./LivePointerView";
 import {
   LivePointerPushable,
   useLivePointerPushable,
 } from "../contexts/LivePointerContext";
+import { ValueSubject } from "../utils/ValueSubject";
 
 type Props = {};
 
@@ -51,7 +52,7 @@ class CanvasInner extends Component<InnerProps, {}> {
   svgRef = createRef<SVGSVGElement>();
   outerGroupRef = createRef<SVGGElement>();
 
-  panningState$ = new BehaviorSubject<PanningState>({
+  panningState$ = new ValueSubject<PanningState>({
     type: PanningStateType.idle,
   });
   canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoom$);

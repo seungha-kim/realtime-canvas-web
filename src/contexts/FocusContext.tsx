@@ -1,7 +1,7 @@
 import { h, Component, ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
-import { BehaviorSubject } from "rxjs";
 import { distinctUntilChanged, map } from "rxjs/operators";
+import { ValueSubject } from "../utils/ValueSubject";
 
 export enum FocusType {
   layerPanelItem,
@@ -19,7 +19,7 @@ export type Focus =
       id: string;
     };
 
-class FocusObservable extends BehaviorSubject<Focus> {
+class FocusObservable extends ValueSubject<Focus> {
   focusedObjectId$ = this.pipe(
     map((focus) => {
       if (focus) {

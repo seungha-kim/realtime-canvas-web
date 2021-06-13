@@ -1,6 +1,6 @@
 import { h, Component, createContext } from "preact";
 import { useContext } from "preact/hooks";
-import { BehaviorSubject } from "rxjs";
+import { ValueSubject } from "../utils/ValueSubject";
 
 export type Panzoom = {
   panX: number;
@@ -8,7 +8,7 @@ export type Panzoom = {
   zoomLevel: number;
 };
 
-export class PanzoomObservable extends BehaviorSubject<Panzoom> {
+export class PanzoomObservable extends ValueSubject<Panzoom> {
   pan = (panX: number, panY: number) => {
     this.next({
       ...this.value,
