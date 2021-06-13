@@ -12,6 +12,8 @@ export function SystemFacadeProvider(props: Props) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const host = process.env.WS_HOST;
   const [facade, setFacade] = useState<SystemFacade>(null as any);
+  (window as any).system = facade;
+
   useEffect(() => {
     (async () => {
       // TODO: 객체 생성과 소켓 연결 시점을 분리

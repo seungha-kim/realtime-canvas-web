@@ -19,7 +19,7 @@ export type Focus =
       id: string;
     };
 
-class FocusObservable extends ValueSubject<Focus> {
+export class FocusObservable extends ValueSubject<Focus> {
   focusedObjectId$ = this.pipe(
     map((focus) => {
       if (focus) {

@@ -12,6 +12,7 @@ type InnerProps = {
   oval: NonNullable<ObjectMaterial["Oval"]>;
   onObjectDeletion: () => void;
   onGoingFront: () => void;
+  onChangingParent: (parentId: string) => void;
 };
 
 class OvalAttrInner extends Component<InnerProps, {}> {
@@ -25,6 +26,13 @@ class OvalAttrInner extends Component<InnerProps, {}> {
     e.preventDefault();
     e.stopPropagation();
     this.props.onGoingFront();
+  };
+
+  handleChangeParentButtonClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const parentId = prompt("new parent id");
+    parentId && this.props.onChangingParent(parentId);
   };
 
   render() {
@@ -55,6 +63,9 @@ class OvalAttrInner extends Component<InnerProps, {}> {
         </dl>
         <button onClick={this.handleDeleteButtonClick}>delete</button>
         <button onClick={this.handleFrontButtonClick}>go front</button>
+        <button onClick={this.handleChangeParentButtonClick}>
+          change parent
+        </button>
       </div>
     );
   }
@@ -74,6 +85,14 @@ function OvalAttr(props: Props) {
         // TODO: 버튼 비활성화 or 예외 처리
         system.pushDocumentCommand({
           UpdateIndex: { id: props.oval.id, int_index: props.index + 2 },
+        });
+      }}
+      onChangingParent={(parentId) => {
+        system.pushDocumentCommand({
+          UpdateParent: {
+            id: props.oval.id,
+            parent_id: parentId,
+          },
         });
       }}
     />

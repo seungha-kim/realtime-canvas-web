@@ -1,20 +1,20 @@
-import { Component, h, Fragment } from "preact";
-import { ObjectMaterial } from "../../SystemFacade";
-import { ComponentSubscription } from "../../utils/ComponentSubscription";
+import { h, Component, Fragment } from "preact";
+import { ObjectMaterial, SystemFacade } from "../../SystemFacade";
 import { TransformControl, useTransformControl } from "./TransformControl";
+import { ComponentSubscription } from "../../utils/ComponentSubscription";
+import { useSystemFacade } from "../../contexts/SystemFacadeContext";
+import DrawingObject from "./DrawingObject";
 
 type Props = {
-  material: NonNullable<ObjectMaterial["Oval"]>;
+  material: NonNullable<ObjectMaterial["Frame"]>;
 };
 
 type InnerProps = Props & {
   control: TransformControl;
+  system: SystemFacade;
 };
 
-class OvalInner extends Component<
-  InnerProps,
-  { name: string; number: number }
-> {
+class FrameInner extends Component<InnerProps, {}> {
   private readonly sub = new ComponentSubscription(this);
 
   componentDidMount() {
@@ -43,30 +43,31 @@ class OvalInner extends Component<
   }
 
   render() {
-    let {
-      r_h,
-      r_v,
-      fill_color: { r, g, b },
-    } = this.props.material;
+    const m = this.props.material;
     let [pos_x, pos_y] = this.controlledPosition;
 
     return (
       <>
-        <ellipse
+        <rect
+          x={pos_x}
+          y={pos_y}
+          width={m.w}
+          height={m.h}
+          fill={this.props.control.isSelected ? "red" : "black"}
           onClick={this.handleClick}
           onMouseDown={this.handleMouseDown}
-          cx={pos_x}
-          cy={pos_y}
-          rx={r_h}
-          ry={r_v}
-          fill={`rgb(${r}, ${g}, ${b})`}
         />
+        <g transform={`translate(${pos_x} ${pos_y})`}>
+          {m.children.map((id) => (
+            <DrawingObject objectId={id} />
+          ))}
+        </g>
         {this.props.control.isSelected && (
           <rect
-            x={pos_x - r_h}
-            y={pos_y - r_v}
-            width={r_h * 2}
-            height={r_v * 2}
+            x={pos_x}
+            y={pos_y}
+            width={m.w}
+            height={m.h}
             stroke={"red"}
             fill={"none"}
           />
@@ -76,10 +77,10 @@ class OvalInner extends Component<
   }
 }
 
-function Oval(props: Props) {
-  const material = props.material;
-  const control = useTransformControl(material.id);
-  return <OvalInner control={control} {...props} />;
+function Frame(props: Props) {
+  const control = useTransformControl(props.material.id);
+  const system = useSystemFacade();
+  return <FrameInner control={control} system={system} {...props} />;
 }
 
-export default Oval;
+export default Frame;

@@ -84,8 +84,19 @@ export type ObjectMaterial = {
     pos_y: number;
     w: number;
     h: number;
+    children: string[];
   };
 };
+
+export function getPos(material: ObjectMaterial): [number, number] {
+  if (material.Oval) {
+    return [material.Oval.pos_x, material.Oval.pos_y];
+  } else if (material.Frame) {
+    return [material.Frame.pos_x, material.Frame.pos_y];
+  } else {
+    throw new Error("Unsupported material");
+  }
+}
 
 export type DocumentCommand = {
   UpdateDocumentName?: { name: string };
@@ -104,6 +115,7 @@ export type DocumentCommand = {
   UpdatePosition?: { id: string; pos: [number, number] };
   DeleteObject?: { id: string };
   UpdateIndex?: { id: string; int_index: number };
+  UpdateParent?: { id: string; parent_id: string };
 };
 
 type InvalidationListener = (objectId: string) => void;

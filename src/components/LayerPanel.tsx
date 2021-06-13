@@ -14,48 +14,17 @@ type Props = {};
 type InnerProps = Props & {
   system: SystemFacade;
   document: DocumentMaterial;
-  focusedObjectId: string | null;
   onLayerSelected: (id: string) => void;
 };
 
 type InnerState = {};
 
 class LayerPanelInner extends Component<InnerProps, InnerState> {
-  private handleItemClick = (id: string) => {
-    this.props.onLayerSelected(id);
-  };
-
-  private handleItemDblClick = (id: string) => {
-    const name = prompt("new name");
-    if (name) {
-      this.props.system.pushDocumentCommand({
-        UpdateName: {
-          id,
-          name,
-        },
-      });
-    }
-  };
-
   render() {
     return (
       <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
         {this.props.document?.children.map((id) => {
-          const { focusedObjectId } = this.props;
-          const selected = focusedObjectId === id;
-          return (
-            <LayerPanelItem
-              key={id}
-              onClick={() => {
-                this.handleItemClick(id);
-              }}
-              onDblClick={() => {
-                this.handleItemDblClick(id);
-              }}
-              id={id}
-              selected={selected}
-            />
-          );
+          return <LayerPanelItem key={id} level={0} id={id} />;
         })}
       </div>
     );
@@ -65,13 +34,13 @@ class LayerPanelInner extends Component<InnerProps, InnerState> {
 function LayerPanel(props: Props) {
   const system = useSystemFacade();
   const document = useDocumentMaterial();
+  // TODO: useFocusedObjectId 에 의해 구독이 되고 있기 때문에 일단 호출해둠. 나중에 focus$ 를 직접 구독하는 식으로 변경
+  useFocusedObjectId();
   const focus$ = useFocus$();
-  const focusedObjectId = useFocusedObjectId();
   return (
     <LayerPanelInner
       document={document}
       system={system}
-      focusedObjectId={focusedObjectId}
       onLayerSelected={(id) => {
         focus$.next({
           type: FocusType.layerPanelItem,
