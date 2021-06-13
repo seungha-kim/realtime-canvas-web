@@ -13,7 +13,13 @@ function createInner(focusedObjectId: string | null) {
 function AttrPanel() {
   const focusedObjectId = useFocusedObjectId();
   return (
-    <div style={{ backgroundColor: "silver", flex: "0 0 200px" }}>
+    <div
+      style={{
+        backgroundColor: "silver",
+        flex: "0 0 200px",
+        overflow: "hidden",
+      }}
+    >
       {createInner(focusedObjectId)}
     </div>
   );
