@@ -12,6 +12,7 @@ type InnerProps = {
   material: NonNullable<ObjectMaterial["Frame"]>;
   onObjectDeletion: () => void;
   onGoingFront: () => void;
+  onChangingParent: (parentId: string) => void;
 };
 
 class FrameAttrInner extends Component<InnerProps, {}> {
@@ -25,6 +26,13 @@ class FrameAttrInner extends Component<InnerProps, {}> {
     e.preventDefault();
     e.stopPropagation();
     this.props.onGoingFront();
+  };
+
+  handleChangeParentButtonClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const parentId = prompt("new parent id");
+    parentId && this.props.onChangingParent(parentId);
   };
 
   render() {
@@ -61,6 +69,9 @@ class FrameAttrInner extends Component<InnerProps, {}> {
         </dl>
         <button onClick={this.handleDeleteButtonClick}>delete</button>
         <button onClick={this.handleFrontButtonClick}>go front</button>
+        <button onClick={this.handleChangeParentButtonClick}>
+          change parent
+        </button>
       </div>
     );
   }
@@ -80,6 +91,14 @@ function FrameAttr(props: Props) {
         // TODO: 버튼 비활성화 or 예외 처리
         system.pushDocumentCommand({
           UpdateIndex: { id: props.material.id, int_index: props.index + 2 },
+        });
+      }}
+      onChangingParent={(parentId) => {
+        system.pushDocumentCommand({
+          UpdateParent: {
+            id: props.material.id,
+            parent_id: parentId,
+          },
         });
       }}
     />
