@@ -231,6 +231,19 @@ export class SystemFacade {
     }
   }
 
+  redo() {
+    this.system.redo();
+    this.notifyObjectInvalidation();
+    while (true) {
+      const pendingCommand = this.system.consume_pending_identifiable_command();
+      if (pendingCommand) {
+        this.ws.send(pendingCommand);
+      } else {
+        break;
+      }
+    }
+  }
+
   addInvalidationListener(objectId: string, listener: InvalidationListener) {
     const listeners = this.invalidationListeners.get(objectId) ?? new Set();
     listeners.add(listener);

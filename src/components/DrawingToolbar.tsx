@@ -42,12 +42,19 @@ class DrawingToolbarInner extends Component<InnerProps, InnerState> {
     this.props.system.undo();
   };
 
+  private handleRedoClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.props.system.redo();
+  };
+
   render() {
     return (
       <div>
         <button onClick={this.handleOvalButtonClick}>Create Oval</button>
         <button onClick={this.handleFrameButtonClick}>Create Frame</button>
         <button onClick={this.handleUndoClick}>Undo</button>
+        <button onClick={this.handleRedoClick}>Redo</button>
       </div>
     );
   }
