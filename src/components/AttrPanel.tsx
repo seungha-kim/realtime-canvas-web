@@ -1,17 +1,12 @@
 import { h } from "preact";
 import { useFocusedObjectId } from "../contexts/FocusContext";
 import ObjectAttr from "./attr/ObjectAttr";
-
-function createInner(focusedObjectId: string | null) {
-  if (focusedObjectId !== null) {
-    return <ObjectAttr id={focusedObjectId} key={focusedObjectId} />;
-  } else {
-    return null;
-  }
-}
+import { useSystemFacade } from "../contexts/SystemFacadeContext";
 
 function AttrPanel() {
-  const focusedObjectId = useFocusedObjectId();
+  const system = useSystemFacade();
+  const focusedObjectId =
+    useFocusedObjectId() ?? system.materializeDocument().id; // TODO: system 으로부터 document id 직접 받아오기
   return (
     <div
       style={{
@@ -20,7 +15,7 @@ function AttrPanel() {
         overflow: "hidden",
       }}
     >
-      {createInner(focusedObjectId)}
+      <ObjectAttr id={focusedObjectId} key={focusedObjectId} />
     </div>
   );
 }
