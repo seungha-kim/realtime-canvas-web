@@ -71,7 +71,7 @@ class LayerPanelItermInner extends Component<InnerProps> {
     const desc = createDescription(this.props.material);
 
     return (
-      <div style={{ paddingLeft: this.props.level * 20 }}>
+      <div style={{ paddingLeft: 20 }}>
         <div
           style={{
             backgroundColor: this.props.selected ? "red" : null,
