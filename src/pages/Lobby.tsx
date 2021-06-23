@@ -3,7 +3,7 @@ import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { SystemFacade } from "../SystemFacade";
 
 type Props = {
-  onJoin: () => void;
+  onJoin: (sessionId: number) => void;
 };
 
 type InnerProps = Props & {
@@ -14,15 +14,15 @@ class LobbyInner extends Component<InnerProps> {
   inputRef = createRef<HTMLInputElement>();
 
   handleCreate = async () => {
-    await this.props.system.createSession();
-    this.props.onJoin();
+    const event = await this.props.system.createSession();
+    this.props.onJoin(event.JoinedSession!.session_id);
   };
 
   handleJoin = async () => {
     const sessionId = parseInt(this.inputRef.current!.value, 10);
     try {
-      await this.props.system.joinSession(sessionId);
-      this.props.onJoin();
+      const event = await this.props.system.joinSession(sessionId);
+      this.props.onJoin(event.JoinedSession!.session_id);
     } catch (e) {
       alert(e);
     }

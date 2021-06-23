@@ -8,13 +8,22 @@ import "./index.css";
 
 function App() {
   const [route, setRoute] = useState("lobby");
+  const [sessionId, setSessionId] = useState<number | null>(null);
   return (
     <ToastProvider>
       <SystemFacadeProvider>
         {route === "lobby" ? (
-          <Lobby onJoin={() => setRoute("session")} />
+          <Lobby
+            onJoin={(sessionId) => {
+              setSessionId(sessionId);
+              setRoute("session");
+            }}
+          />
         ) : route === "session" ? (
-          <SystemConsole onLeave={() => setRoute("lobby")} />
+          <SystemConsole
+            sessionId={sessionId!}
+            onLeave={() => setRoute("lobby")}
+          />
         ) : null}
       </SystemFacadeProvider>
     </ToastProvider>

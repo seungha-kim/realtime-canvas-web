@@ -12,6 +12,7 @@ import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { MaterialBroadcastProvider } from "../contexts/MaterialBroadcastContext";
 
 type Props = {
+  sessionId: number;
   onLeave: () => void;
 };
 
@@ -20,7 +21,7 @@ type InnerProps = Props;
 function SystemConsoleInner(props: InnerProps) {
   return (
     <div>
-      <DocumentHeader />
+      <DocumentHeader sessionId={props.sessionId} />
       <DrawingToolbar />
       <SessionControl onLeave={props.onLeave} />
       <div style={{ display: "flex", justifyContent: "space-between" }}>

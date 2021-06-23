@@ -3,7 +3,9 @@ import { DocumentMaterial, SystemFacade } from "../SystemFacade";
 import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { useDocumentMaterial } from "../contexts/MaterialBroadcastContext";
 
-type Props = {};
+type Props = {
+  sessionId: number;
+};
 
 type InnerProps = Props & {
   document: DocumentMaterial;
@@ -23,15 +25,18 @@ class DocumentHeaderInner extends Component<InnerProps, InnerState> {
   };
 
   render() {
-    const { document } = this.props;
+    const { document, sessionId } = this.props;
     return (
-      <h1
-        onClick={(e) => {
-          e.stopPropagation();
-          this.handleTitleClick();
-        }}
-      >
-        {document.name}
+      <h1>
+        Session {sessionId} -{" "}
+        <b
+          onClick={(e) => {
+            e.stopPropagation();
+            this.handleTitleClick();
+          }}
+        >
+          {document.name}
+        </b>
       </h1>
     );
   }
