@@ -4,6 +4,7 @@ import { TransformControl, useTransformControl } from "./TransformControl";
 import { ComponentSubscription } from "../../utils/ComponentSubscription";
 import { useSystemFacade } from "../../contexts/SystemFacadeContext";
 import DrawingObject from "./DrawingObject";
+import { commonDrawingStyle } from "./style";
 
 type Props = {
   material: NonNullable<ObjectMaterial["Frame"]>;
@@ -56,6 +57,7 @@ class FrameInner extends Component<InnerProps, {}> {
           fill={this.props.control.isSelected ? "red" : "black"}
           onClick={this.handleClick}
           onMouseDown={this.handleMouseDown}
+          style={{ ...commonDrawingStyle(this.props.control) }}
         />
         <g transform={`translate(${pos_x} ${pos_y})`}>
           {m.children.map((id) => (

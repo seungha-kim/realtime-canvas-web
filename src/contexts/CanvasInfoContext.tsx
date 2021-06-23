@@ -11,6 +11,16 @@ export class CanvasInfo {
     this.panzoomObservable = panzoomObservable;
   }
 
+  startSoloPointerEvent() {
+    // @ts-ignore
+    this.elementRef.current!.style.pointerEvents = "none";
+  }
+
+  finishSoloPointerEvent() {
+    // @ts-ignore
+    this.elementRef.current!.style.pointerEvents = "auto";
+  }
+
   clientToDomPoint(browserPoint: [number, number]): [number, number] {
     const rect = this.elementRef.current!.getBoundingClientRect();
     return [browserPoint[0] - rect.left, browserPoint[1] - rect.top];

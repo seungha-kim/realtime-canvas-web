@@ -2,6 +2,7 @@ import { Component, h, Fragment } from "preact";
 import { ObjectMaterial } from "../../SystemFacade";
 import { ComponentSubscription } from "../../utils/ComponentSubscription";
 import { TransformControl, useTransformControl } from "./TransformControl";
+import { commonDrawingStyle } from "./style";
 
 type Props = {
   material: NonNullable<ObjectMaterial["Oval"]>;
@@ -60,6 +61,7 @@ class OvalInner extends Component<
           rx={r_h}
           ry={r_v}
           fill={`rgb(${r}, ${g}, ${b})`}
+          style={{ ...commonDrawingStyle(this.props.control) }}
         />
         {this.props.control.isSelected && (
           <rect

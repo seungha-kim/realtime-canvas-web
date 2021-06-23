@@ -51,6 +51,7 @@ export class TransformControl implements Disposable {
 
   dispose(): void {
     this.cleanupGlobalEventListeners();
+    this.canvasInfo.finishSoloPointerEvent();
   }
 
   private attachGlobalEventListeners() {
@@ -99,6 +100,7 @@ export class TransformControl implements Disposable {
       });
     }
     this.letIdle();
+    this.canvasInfo.finishSoloPointerEvent();
   }
 
   prepareToMove(clientX: number, clientY: number) {
@@ -112,6 +114,7 @@ export class TransformControl implements Disposable {
         ]),
       });
       this.attachGlobalEventListeners();
+      this.canvasInfo.startSoloPointerEvent();
     }
   }
 
