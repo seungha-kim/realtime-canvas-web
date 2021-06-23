@@ -2,7 +2,7 @@ import { h, Component, createContext, RefObject } from "preact";
 import { useContext } from "preact/hooks";
 import { PanzoomObservable } from "./PanzoomContext";
 
-export class CanvasInfo {
+export class DrawingRoot {
   elementRef: RefObject<Element>;
   panzoomObservable: PanzoomObservable;
 
@@ -33,22 +33,22 @@ export class CanvasInfo {
   }
 }
 
-const CanvasInfoContext = createContext<CanvasInfo>(null as any);
+const DrawingRootContext = createContext<DrawingRoot>(null as any);
 
 type Props = {
-  canvasInfo: CanvasInfo;
+  drawingRoot: DrawingRoot;
 };
 
-export class CanvasInfoProvider extends Component<Props, {}> {
+export class DrawingRootProvider extends Component<Props, {}> {
   render() {
     return (
-      <CanvasInfoContext.Provider value={this.props.canvasInfo}>
+      <DrawingRootContext.Provider value={this.props.drawingRoot}>
         {this.props.children}
-      </CanvasInfoContext.Provider>
+      </DrawingRootContext.Provider>
     );
   }
 }
 
-export const useCanvasInfo = () => {
-  return useContext(CanvasInfoContext);
+export const useDrawingRoot = () => {
+  return useContext(DrawingRootContext);
 };

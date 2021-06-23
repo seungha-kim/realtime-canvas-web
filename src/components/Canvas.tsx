@@ -8,7 +8,10 @@ import {
   PanzoomObservable,
   usePanzoom$,
 } from "../contexts/PanzoomContext";
-import { CanvasInfo, CanvasInfoProvider } from "../contexts/CanvasInfoContext";
+import {
+  DrawingRoot,
+  DrawingRootProvider,
+} from "../contexts/CanvasInfoContext";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { LivePointerListView } from "./LivePointerView";
@@ -55,7 +58,7 @@ class CanvasInner extends Component<InnerProps, {}> {
   panningState$ = new ValueSubject<PanningState>({
     type: PanningStateType.idle,
   });
-  canvasInfo = new CanvasInfo(this.svgRef, this.props.panzoom$);
+  drawingRoot = new DrawingRoot(this.svgRef, this.props.panzoom$);
   teardown$ = new Subject<void>();
 
   componentDidMount() {
@@ -107,14 +110,14 @@ class CanvasInner extends Component<InnerProps, {}> {
       const [
         initialLogicalX,
         initialLogicalY,
-      ] = this.canvasInfo.clientToLogicalPoint([
+      ] = this.drawingRoot.clientToLogicalPoint([
         initialClientX,
         initialClientY,
       ]);
       const [
         currentLogicalX,
         currentLogicalY,
-      ] = this.canvasInfo.clientToLogicalPoint([e.clientX, e.clientY]);
+      ] = this.drawingRoot.clientToLogicalPoint([e.clientX, e.clientY]);
 
       this.props.panzoom$.pan(
         initialPanX - currentLogicalX + initialLogicalX,
@@ -137,7 +140,7 @@ class CanvasInner extends Component<InnerProps, {}> {
     const { panzoom$ } = this.props;
     const { zoomLevel } = panzoom$.value;
     let newZoomLevel = zoomLevel + e.deltaY * -0.01;
-    const [logicalX, logicalY] = this.canvasInfo.clientToLogicalPoint([
+    const [logicalX, logicalY] = this.drawingRoot.clientToLogicalPoint([
       e.clientX,
       e.clientY,
     ]);
@@ -225,7 +228,7 @@ class CanvasInner extends Component<InnerProps, {}> {
   };
 
   handleMouseMove = (e: MouseEvent) => {
-    const [logicalX, logicalY] = this.canvasInfo.clientToLogicalPoint([
+    const [logicalX, logicalY] = this.drawingRoot.clientToLogicalPoint([
       e.clientX,
       e.clientY,
     ]);
@@ -237,7 +240,7 @@ class CanvasInner extends Component<InnerProps, {}> {
 
   render() {
     return (
-      <CanvasInfoProvider canvasInfo={this.canvasInfo}>
+      <DrawingRootProvider drawingRoot={this.drawingRoot}>
         <div style={{ position: "relative" }}>
           <svg
             ref={this.svgRef}
@@ -259,7 +262,7 @@ class CanvasInner extends Component<InnerProps, {}> {
           </svg>
           <LivePointerListView />
         </div>
-      </CanvasInfoProvider>
+      </DrawingRootProvider>
     );
   }
 }

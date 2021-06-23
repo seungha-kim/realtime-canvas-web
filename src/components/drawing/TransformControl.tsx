@@ -6,7 +6,7 @@ import {
   FocusType,
   useFocus$,
 } from "../../contexts/FocusContext";
-import { CanvasInfo, useCanvasInfo } from "../../contexts/CanvasInfoContext";
+import { DrawingRoot, useDrawingRoot } from "../../contexts/CanvasInfoContext";
 import { ValueSubject } from "../../utils/ValueSubject";
 import { Observable } from "rxjs";
 import { distinctUntilChanged, map } from "rxjs/operators";
@@ -28,7 +28,7 @@ export class TransformControl implements Disposable {
   private readonly id: string;
   private readonly system: SystemFacade;
   private readonly focus$: FocusObservable;
-  private readonly canvasInfo: CanvasInfo;
+  private readonly drawingRoot: DrawingRoot;
 
   readonly controlMode$ = new ValueSubject<ControlMode>(null);
   readonly isSelected$: Observable<boolean>;
@@ -37,12 +37,12 @@ export class TransformControl implements Disposable {
     id: string,
     system: SystemFacade,
     focus$: FocusObservable,
-    canvasInfo: CanvasInfo
+    drawingRoot: DrawingRoot
   ) {
     this.id = id;
     this.system = system;
     this.focus$ = focus$;
-    this.canvasInfo = canvasInfo;
+    this.drawingRoot = drawingRoot;
     this.isSelected$ = this.focus$.pipe(
       map(this.isSelectedMapper),
       distinctUntilChanged()
@@ -51,7 +51,7 @@ export class TransformControl implements Disposable {
 
   dispose(): void {
     this.cleanupGlobalEventListeners();
-    this.canvasInfo.finishSoloPointerEvent();
+    this.drawingRoot.finishSoloPointerEvent();
   }
 
   private attachGlobalEventListeners() {
@@ -100,7 +100,7 @@ export class TransformControl implements Disposable {
       });
     }
     this.letIdle();
-    this.canvasInfo.finishSoloPointerEvent();
+    this.drawingRoot.finishSoloPointerEvent();
   }
 
   prepareToMove(clientX: number, clientY: number) {
@@ -108,13 +108,13 @@ export class TransformControl implements Disposable {
     if (this.controlMode$.value === null) {
       this.controlMode$.next({
         type: "prepareMoving",
-        initialLogicalPoint: this.canvasInfo.clientToLogicalPoint([
+        initialLogicalPoint: this.drawingRoot.clientToLogicalPoint([
           clientX,
           clientY,
         ]),
       });
       this.attachGlobalEventListeners();
-      this.canvasInfo.startSoloPointerEvent();
+      this.drawingRoot.startSoloPointerEvent();
     }
   }
 
@@ -127,7 +127,7 @@ export class TransformControl implements Disposable {
       this.controlMode$.next({
         type: "moving",
         initialLogicalPoint: controlMode.initialLogicalPoint,
-        currentLogicalPoint: this.canvasInfo.clientToLogicalPoint([
+        currentLogicalPoint: this.drawingRoot.clientToLogicalPoint([
           clientX,
           clientY,
         ]),
@@ -157,9 +157,9 @@ export class TransformControl implements Disposable {
 export function useTransformControl(id: string) {
   const focus$ = useFocus$();
   const system = useSystemFacade();
-  const canvasInfo = useCanvasInfo();
+  const drawingRoot = useDrawingRoot();
   const [control] = useState(
-    () => new TransformControl(id, system, focus$, canvasInfo)
+    () => new TransformControl(id, system, focus$, drawingRoot)
   );
 
   useEffect(() => {
