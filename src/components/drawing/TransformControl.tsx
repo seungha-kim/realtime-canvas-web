@@ -6,7 +6,7 @@ import {
   FocusType,
   useFocus$,
 } from "../../contexts/FocusContext";
-import { DrawingRoot, useDrawingRoot } from "../../contexts/CanvasInfoContext";
+import { DrawingRoot, useDrawingRoot } from "../../contexts/DrawingRootContext";
 import { ValueSubject } from "../../utils/ValueSubject";
 import { Observable } from "rxjs";
 import { distinctUntilChanged, map } from "rxjs/operators";

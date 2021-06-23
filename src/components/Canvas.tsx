@@ -11,7 +11,7 @@ import {
 import {
   DrawingRoot,
   DrawingRootProvider,
-} from "../contexts/CanvasInfoContext";
+} from "../contexts/DrawingRootContext";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { LivePointerListView } from "./LivePointerView";
