@@ -15,8 +15,8 @@ class DrawingToolbarInner extends Component<InnerProps, InnerState> {
     this.props.system.pushDocumentCommand({
       CreateOval: {
         pos: [500 * Math.random(), 500 * Math.random()],
-        r_h: 30 * Math.random(),
-        r_v: 30 * Math.random(),
+        r_h: 20 + 20 * Math.random(),
+        r_v: 20 + 20 * Math.random(),
         fill_color: {
           r: Math.floor(256 * Math.random()),
           g: Math.floor(256 * Math.random()),
@@ -30,8 +30,8 @@ class DrawingToolbarInner extends Component<InnerProps, InnerState> {
     this.props.system.pushDocumentCommand({
       CreateFrame: {
         pos: [500 * Math.random(), 500 * Math.random()],
-        w: 100 * Math.random(),
-        h: 100 * Math.random(),
+        w: 50 + 50 * Math.random(),
+        h: 50 + 50 * Math.random(),
       },
     });
   };
