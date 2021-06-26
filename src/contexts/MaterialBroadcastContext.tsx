@@ -36,8 +36,10 @@ class MaterialBroadcastManager {
 
     const invalidationCallback = () => {
       const material = this.systemFacade.materializeObject(objectId);
-      this.materialCache.set(objectId, material);
-      subject$.next(material);
+      if (material) {
+        this.materialCache.set(objectId, material);
+        subject$.next(material);
+      }
     };
 
     const finalizer = () => {
@@ -52,7 +54,7 @@ class MaterialBroadcastManager {
     const broadcast$ = subject$.pipe(finalize(finalizer), share());
 
     const material = this.systemFacade.materializeObject(objectId);
-    this.materialCache.set(objectId, material);
+    this.materialCache.set(objectId, material!);
     this.broadcastRegistry.set(objectId, broadcast$);
     this.systemFacade.addInvalidationListener(objectId, invalidationCallback);
 

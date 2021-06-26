@@ -201,8 +201,12 @@ export class SystemFacade {
     return JSON.parse(this.system.materialize_session()!);
   }
 
-  materializeObject(objectId: string): ObjectMaterial {
-    return JSON.parse(this.system.materialize_object(objectId)!);
+  materializeObject(objectId: string): ObjectMaterial | null {
+    try {
+      return JSON.parse(this.system.materialize_object(objectId));
+    } catch {
+      return null;
+    }
   }
 
   pushDocumentCommand(command: DocumentCommand) {

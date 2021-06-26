@@ -91,7 +91,7 @@ export class TransformControl implements Disposable {
     const controlMode = this.controlMode$.value;
     if (controlMode?.type === "moving") {
       const [offsetX, offsetY] = this.controlledOffset;
-      const [posX, posY] = getPos(this.system.materializeObject(this.id));
+      const [posX, posY] = getPos(this.system.materializeObject(this.id)!);
       this.system.pushDocumentCommand({
         UpdatePosition: {
           id: this.id,
