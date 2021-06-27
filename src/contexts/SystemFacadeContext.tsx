@@ -5,6 +5,7 @@ import { SystemFacade } from "../SystemFacade";
 const SystemFacadeContext = createContext<SystemFacade | null>(null!);
 
 type Props = {
+  sessionId: number;
   children: ComponentChildren;
 };
 
@@ -16,8 +17,9 @@ export function SystemFacadeProvider(props: Props) {
 
   useEffect(() => {
     (async () => {
-      // TODO: 객체 생성과 소켓 연결 시점을 분리
-      const facade = await SystemFacade.create(`${protocol}//${host}/ws/`);
+      const facade = await SystemFacade.create(
+        `${protocol}//${host}/ws/${props.sessionId}/`
+      );
       setFacade(facade);
     })();
   }, []);

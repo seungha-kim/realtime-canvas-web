@@ -1,28 +1,18 @@
 import { h, Component, createRef } from "preact";
-import { useSystemFacade } from "../contexts/SystemFacadeContext";
-import { SystemFacade } from "../SystemFacade";
 
 type Props = {
   onJoin: (sessionId: number) => void;
 };
 
-type InnerProps = Props & {
-  system: SystemFacade;
-};
+type InnerProps = Props & {};
 
 class LobbyInner extends Component<InnerProps> {
   inputRef = createRef<HTMLInputElement>();
 
-  handleCreate = async () => {
-    const event = await this.props.system.createSession();
-    this.props.onJoin(event.JoinedSession!.session_id);
-  };
-
   handleJoin = async () => {
     const sessionId = parseInt(this.inputRef.current!.value, 10);
     try {
-      const event = await this.props.system.joinSession(sessionId);
-      this.props.onJoin(event.JoinedSession!.session_id);
+      this.props.onJoin(sessionId);
     } catch (e) {
       alert(e);
     }
@@ -31,10 +21,6 @@ class LobbyInner extends Component<InnerProps> {
   render() {
     return (
       <div>
-        <div>
-          <button onClick={this.handleCreate}>Create a session</button>
-        </div>
-        <div>Or</div>
         <div>
           Join a session: <input ref={this.inputRef} type="text" />
           <button onClick={this.handleJoin}>Join!</button>
@@ -45,12 +31,7 @@ class LobbyInner extends Component<InnerProps> {
 }
 
 function Lobby(props: Props) {
-  const system = useSystemFacade();
-  if (system) {
-    return <LobbyInner {...props} system={system} />;
-  } else {
-    return null;
-  }
+  return <LobbyInner {...props} />;
 }
 
 export default Lobby;

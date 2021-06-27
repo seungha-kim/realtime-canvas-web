@@ -71,7 +71,7 @@ type ProviderProps = {
   children: ComponentChildren;
 };
 
-export class MaterialBroadcastProvider extends Component<ProviderProps, {}> {
+class MaterialBroadcastProviderInner extends Component<ProviderProps, {}> {
   private manager = new MaterialBroadcastManager(this.props.systemFacade);
   render() {
     return (
@@ -80,6 +80,17 @@ export class MaterialBroadcastProvider extends Component<ProviderProps, {}> {
       </MaterialBroadcastContext.Provider>
     );
   }
+}
+
+export function MaterialBroadcastProvider(props: {
+  children: ComponentChildren;
+}) {
+  const systemFacade = useSystemFacade();
+  return (
+    <MaterialBroadcastProviderInner systemFacade={systemFacade}>
+      {props.children}
+    </MaterialBroadcastProviderInner>
+  );
 }
 
 export const useObjectMaterialObservable = (objectId: string) => {

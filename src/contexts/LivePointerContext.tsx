@@ -17,6 +17,7 @@ import {
   SystemFacade,
 } from "../SystemFacade";
 import { Disposable } from "../utils/Disposable";
+import { useSystemFacade } from "./SystemFacadeContext";
 
 export interface LivePointerPushable {
   pushEvent(e: LivePointerCommand): void;
@@ -72,10 +73,7 @@ type LivePointerProviderProps = {
   children: ComponentChildren;
 };
 
-export class LivePointerProvider extends Component<
-  LivePointerProviderProps,
-  {}
-> {
+class LivePointerProviderInner extends Component<LivePointerProviderProps, {}> {
   livePointerManager = new LivePointerManager(this.props.systemFacade);
 
   componentWillUnmount() {
@@ -89,6 +87,15 @@ export class LivePointerProvider extends Component<
       </LivePointerContext.Provider>
     );
   }
+}
+
+export function LivePointerProvider(props: { children: ComponentChildren }) {
+  const systemFacade = useSystemFacade();
+  return (
+    <LivePointerProviderInner systemFacade={systemFacade}>
+      {props.children}
+    </LivePointerProviderInner>
+  );
 }
 
 export function useLivePointer(connectionId: number) {

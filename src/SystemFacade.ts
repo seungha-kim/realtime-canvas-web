@@ -3,6 +3,8 @@ import mod from "./wasm/realtime-canvas_bg.wasm";
 // @ts-ignore
 import init, { CanvasSystem } from "./wasm/realtime-canvas";
 import { Subject } from "rxjs";
+import { Disposable } from "./utils/Disposable";
+import { takeUntil } from "rxjs/operators";
 
 export interface LivePointerEvent {
   connection_id: number;
@@ -19,38 +21,29 @@ type ConnectionId = number;
 type SessionId = number;
 type CommandId = number;
 
-export type SystemEvent = {
-  JoinedSession?: { session_id: SessionId };
-  LeftSession?: null;
-  SessionEvent?: {
-    LivePointer?: LivePointerEvent;
-    SomeoneJoined: ConnectionId;
-    SomeoneLeft: ConnectionId;
-  };
-};
+type SessionCommand = { LivePointer: LivePointerCommand };
 
-type SystemCommand = {
-  CreateSession?: null;
-  JoinSession?: { session_id: SessionId };
-  LeaveSession?: null;
-  SessionCommand?: { LivePointer: LivePointerCommand };
+type SessionEvent = {
+  LivePointer?: LivePointerEvent;
+  SomeoneJoined?: ConnectionId;
+  SomeoneLeft?: ConnectionId;
 };
 
 interface IdentifiableEvent {
   ByMyself?: {
     command_id: CommandId;
     result: {
-      SystemEvent?: SystemEvent;
+      SessionEvent?: SessionEvent;
       Error?: any;
     };
   };
   BySystem?: {
-    system_event: SystemEvent;
+    session_event: SessionEvent;
   };
 }
 
 type CommandResolver = {
-  resolve: (value: SystemEvent) => void;
+  resolve: (value: SessionEvent) => void;
   reject: (error: any) => void;
 };
 
@@ -124,7 +117,7 @@ export type SessionSnapshot = {
   connections: number[];
 };
 
-export class SystemFacade {
+export class SystemFacade implements Disposable {
   private system: CanvasSystem;
   private ws: WebSocket;
   private commandResolverRegistry: Map<CommandId, CommandResolver> = new Map();
@@ -133,22 +126,47 @@ export class SystemFacade {
     Set<InvalidationListener>
   > = new Map();
   private sessionSnapshotChangeListeners: Set<SessionSnapshotListener> = new Set();
-  livePointerEvent$ = new Subject<LivePointerEvent>();
+  private teardown$ = new Subject<void>();
+  private livePointerEventSubject$ = new Subject<LivePointerEvent>();
+  readonly livePointerEvent$ = this.livePointerEventSubject$.pipe(
+    takeUntil(this.teardown$)
+  );
 
   static async create(url: string): Promise<SystemFacade> {
     await init(mod);
-    const system = new CanvasSystem();
-    (window as any).system = system;
-    return new SystemFacade(url, system);
-  }
-
-  private constructor(url: string, system: CanvasSystem) {
-    this.system = system;
 
     const ws = new WebSocket(url);
     ws.binaryType = "arraybuffer";
+
+    const system = await this.initializeSystem(ws);
+
+    return new SystemFacade(system, ws);
+  }
+
+  static async initializeSystem(ws: WebSocket): Promise<CanvasSystem> {
+    return new Promise((resolve) => {
+      const listener = (e: MessageEvent) => {
+        ws.removeEventListener("message", listener);
+
+        const buf = new Uint8Array(e.data);
+        const system = new CanvasSystem(buf);
+        (window as any).system = system;
+        resolve(system);
+      };
+      ws.addEventListener("message", listener);
+    });
+  }
+
+  private constructor(system: CanvasSystem, ws: WebSocket) {
+    this.system = system;
     this.ws = ws;
     this.setupWebSocketEventHandlers();
+  }
+
+  dispose() {
+    this.ws.close();
+    this.system.free();
+    this.teardown$.next();
   }
 
   private setupWebSocketEventHandlers() {
@@ -166,28 +184,10 @@ export class SystemFacade {
     });
   }
 
-  createSession(): Promise<SystemEvent> {
-    return this.sendCommand({
-      CreateSession: null,
-    });
-  }
-
-  joinSession(sessionId: number): Promise<SystemEvent> {
-    return this.sendCommand({
-      JoinSession: { session_id: sessionId },
-    });
-  }
-
-  leaveSession(): Promise<SystemEvent> {
-    return this.sendCommand({
-      LeaveSession: null,
-    });
-  }
-
   sendLivePointer(livePointer: LivePointerCommand) {
     return this.sendCommand(
       {
-        SessionCommand: { LivePointer: livePointer },
+        LivePointer: livePointer,
       },
       false
     );
@@ -293,20 +293,20 @@ export class SystemFacade {
     if (json) {
       const parsed = JSON.parse(json);
       for (const e of parsed) {
-        this.livePointerEvent$.next(e);
+        this.livePointerEventSubject$.next(e);
       }
     }
   }
 
-  private sendCommand(command: SystemCommand): Promise<SystemEvent>;
+  private sendCommand(command: SessionCommand): Promise<SessionEvent>;
   private sendCommand(
-    command: SystemCommand,
+    command: SessionCommand,
     registerCommandResolver: false
   ): void;
   private sendCommand(
-    command: SystemCommand,
+    command: SessionCommand,
     registerCommandResolver = true
-  ): Promise<SystemEvent> | void {
+  ): Promise<SessionEvent> | void {
     SystemFacade.logCommand(command);
     const commandBuf = this.system.create_command(JSON.stringify(command));
     this.ws.send(commandBuf);
@@ -324,9 +324,9 @@ export class SystemFacade {
   }
 
   private handleIdentifiableEvent(event: IdentifiableEvent) {
-    const systemEvent =
-      event.BySystem?.system_event ??
-      event.ByMyself?.result?.SystemEvent ??
+    const sessionEvent =
+      event.BySystem?.session_event ??
+      event.ByMyself?.result?.SessionEvent ??
       null;
 
     if (
@@ -336,19 +336,19 @@ export class SystemFacade {
       const commandId = event.ByMyself.command_id;
       const resolver = this.commandResolverRegistry.get(commandId)!;
       this.commandResolverRegistry.delete(commandId);
-      if (systemEvent) {
-        resolver.resolve(systemEvent);
+      if (sessionEvent) {
+        resolver.resolve(sessionEvent);
       } else {
         resolver.reject(event.ByMyself.result.Error);
       }
     }
   }
 
-  private static logCommand(command: SystemCommand) {
+  private static logCommand(command: SessionCommand) {
     if (process.env.NODE_ENV == "production") {
       return;
     }
-    if (command.SessionCommand?.LivePointer) {
+    if (command.LivePointer) {
       console.debug(this.formatJson(command));
     } else {
       console.info(this.formatJson(command));

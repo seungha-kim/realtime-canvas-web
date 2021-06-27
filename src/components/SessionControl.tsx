@@ -16,7 +16,7 @@ type InnerState = {};
 
 class SessionControlInner extends Component<InnerProps, InnerState> {
   private handleLeave = async () => {
-    await this.props.system.leaveSession();
+    await this.props.system.dispose();
     this.props.onLeave();
   };
 

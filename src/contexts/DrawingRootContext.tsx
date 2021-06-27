@@ -3,22 +3,29 @@ import { useContext } from "preact/hooks";
 import { PanzoomObservable } from "./PanzoomContext";
 
 export class DrawingRoot {
-  elementRef: RefObject<Element>;
+  elementRef: RefObject<SVGSVGElement>;
   panzoomObservable: PanzoomObservable;
 
-  constructor(svg: RefObject<Element>, panzoomObservable: PanzoomObservable) {
+  constructor(
+    svg: RefObject<SVGSVGElement>,
+    panzoomObservable: PanzoomObservable
+  ) {
     this.elementRef = svg;
     this.panzoomObservable = panzoomObservable;
   }
 
   startSoloPointerEvent() {
-    // @ts-ignore
-    this.elementRef.current!.style.pointerEvents = "none";
+    const el = this.elementRef.current;
+    if (el) {
+      el.style.pointerEvents = "none";
+    }
   }
 
   finishSoloPointerEvent() {
-    // @ts-ignore
-    this.elementRef.current!.style.pointerEvents = "auto";
+    const el = this.elementRef.current;
+    if (el) {
+      el.style.pointerEvents = "auto";
+    }
   }
 
   clientToDomPoint(browserPoint: [number, number]): [number, number] {
