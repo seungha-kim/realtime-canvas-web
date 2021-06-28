@@ -5,7 +5,7 @@ import { SystemFacade } from "../SystemFacade";
 const SystemFacadeContext = createContext<SystemFacade | null>(null!);
 
 type Props = {
-  sessionId: number;
+  fileId: string;
   children: ComponentChildren;
 };
 
@@ -18,7 +18,7 @@ export function SystemFacadeProvider(props: Props) {
   useEffect(() => {
     (async () => {
       const facade = await SystemFacade.create(
-        `${protocol}//${host}/ws/${props.sessionId}/`
+        `${protocol}//${host}/ws/${props.fileId}/`
       );
       setFacade(facade);
     })();

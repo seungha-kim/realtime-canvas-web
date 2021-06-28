@@ -1,7 +1,7 @@
 import { h, Component, createRef } from "preact";
 
 type Props = {
-  onJoin: (sessionId: number) => void;
+  onJoin: (fileId: string) => void;
 };
 
 type InnerProps = Props & {};
@@ -10,9 +10,9 @@ class LobbyInner extends Component<InnerProps> {
   inputRef = createRef<HTMLInputElement>();
 
   handleJoin = async () => {
-    const sessionId = parseInt(this.inputRef.current!.value, 10);
+    const fileId = this.inputRef.current!.value;
     try {
-      this.props.onJoin(sessionId);
+      this.props.onJoin(fileId);
     } catch (e) {
       alert(e);
     }

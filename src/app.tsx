@@ -7,21 +7,18 @@ import "./index.css";
 
 function App() {
   const [route, setRoute] = useState("lobby");
-  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [fileId, setFileId] = useState<string | null>(null);
   return (
     <ToastProvider>
       {route === "lobby" ? (
         <Lobby
-          onJoin={(sessionId) => {
-            setSessionId(sessionId);
+          onJoin={(fileId) => {
+            setFileId(fileId);
             setRoute("session");
           }}
         />
       ) : route === "session" ? (
-        <SystemConsole
-          sessionId={sessionId!}
-          onLeave={() => setRoute("lobby")}
-        />
+        <SystemConsole fileId={fileId!} onLeave={() => setRoute("lobby")} />
       ) : null}
     </ToastProvider>
   );

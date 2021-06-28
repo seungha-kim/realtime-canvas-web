@@ -4,7 +4,7 @@ import { useSystemFacade } from "../contexts/SystemFacadeContext";
 import { useDocumentMaterial } from "../contexts/MaterialBroadcastContext";
 
 type Props = {
-  sessionId: number;
+  fileId: string;
 };
 
 type InnerProps = Props & {
@@ -25,10 +25,10 @@ class DocumentHeaderInner extends Component<InnerProps, InnerState> {
   };
 
   render() {
-    const { document, sessionId } = this.props;
+    const { document, fileId } = this.props;
     return (
       <h1>
-        Session {sessionId} -{" "}
+        Session {fileId} -{" "}
         <b
           onClick={(e) => {
             e.stopPropagation();

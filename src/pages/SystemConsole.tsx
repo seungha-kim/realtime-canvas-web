@@ -12,19 +12,19 @@ import { SystemFacadeProvider } from "../contexts/SystemFacadeContext";
 import { MaterialBroadcastProvider } from "../contexts/MaterialBroadcastContext";
 
 type Props = {
-  sessionId: number;
+  fileId: string;
   onLeave: () => void;
 };
 
 function SystemConsole(props: Props) {
   return (
-    <SystemFacadeProvider sessionId={props.sessionId}>
+    <SystemFacadeProvider fileId={props.fileId}>
       <FocusProvider>
         <PanzoomProvider>
           <LivePointerProvider>
             <MaterialBroadcastProvider>
               <div>
-                <DocumentHeader sessionId={props.sessionId} />
+                <DocumentHeader fileId={props.fileId} />
                 <DrawingToolbar />
                 <SessionControl onLeave={props.onLeave} />
                 <div

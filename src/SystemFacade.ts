@@ -18,7 +18,7 @@ export interface LivePointerCommand {
 }
 
 type ConnectionId = number;
-type SessionId = number;
+type FileId = string;
 type CommandId = number;
 
 type SessionCommand = { LivePointer: LivePointerCommand };
