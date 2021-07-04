@@ -18,7 +18,7 @@ export function SystemFacadeProvider(props: Props) {
   useEffect(() => {
     (async () => {
       const facade = await SystemFacade.create(
-        `${protocol}//${host}/ws/${props.fileId}/`
+        `${protocol}//${host}/ws/${props.fileId}`
       );
       setFacade(facade);
     })();
