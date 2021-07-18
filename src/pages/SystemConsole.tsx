@@ -10,7 +10,7 @@ import { PanzoomProvider } from "../contexts/PanzoomContext";
 import { LivePointerProvider } from "../contexts/LivePointerContext";
 import { SystemFacadeProvider } from "../contexts/SystemFacadeContext";
 import { MaterialBroadcastProvider } from "../contexts/MaterialBroadcastContext";
-
+import { TerminationHandler } from "../utils/TerminationHandler";
 type Props = {
   fileId: string;
   onLeave: () => void;
@@ -19,6 +19,7 @@ type Props = {
 function SystemConsole(props: Props) {
   return (
     <SystemFacadeProvider fileId={props.fileId}>
+      <TerminationHandler onTermination={props.onLeave} />
       <FocusProvider>
         <PanzoomProvider>
           <LivePointerProvider>

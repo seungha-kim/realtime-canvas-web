@@ -128,7 +128,11 @@ export class SystemFacade implements Disposable {
   private sessionSnapshotChangeListeners: Set<SessionSnapshotListener> = new Set();
   private teardown$ = new Subject<void>();
   private livePointerEventSubject$ = new Subject<LivePointerEvent>();
+  private terminationSubject$ = new Subject<void>();
   readonly livePointerEvent$ = this.livePointerEventSubject$.pipe(
+    takeUntil(this.teardown$)
+  );
+  readonly termination$ = this.terminationSubject$.pipe(
     takeUntil(this.teardown$)
   );
 
@@ -172,15 +176,21 @@ export class SystemFacade implements Disposable {
   private setupWebSocketEventHandlers() {
     // this.ws.onopen = this.ws.onmessage = this.ws.onerror = this.ws.onclose = console.log
     this.ws.addEventListener("message", (e) => {
+      // TODO: handle event more elegantly rather than using raw event
       const buf = new Uint8Array(e.data);
       const json = this.system.convert_event_to_json(buf);
       const parsed: IdentifiableEvent = JSON.parse(json);
       this.handleIdentifiableEvent(parsed);
 
       this.system.handle_event_from_server(buf);
-      this.notifyObjectInvalidation();
-      this.notifySessionSnapshotInvalidation();
-      this.notifyLivePointerEvents();
+      if (this.system.terminated()) {
+        this.ws.close();
+        this.terminationSubject$.next();
+      } else {
+        this.notifyObjectInvalidation();
+        this.notifySessionSnapshotInvalidation();
+        this.notifyLivePointerEvents();
+      }
     });
   }
 
